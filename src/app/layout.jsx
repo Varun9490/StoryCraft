@@ -1,6 +1,9 @@
 import { Playfair_Display, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import ToastProvider from "@/components/ui/ToastProvider";
+import { CityProvider } from "@/contexts/CityContext";
+import { CartProvider } from "@/contexts/CartContext";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 const playfair = Playfair_Display({
     variable: "--font-playfair",
@@ -54,9 +57,15 @@ export default function RootLayout({ children }) {
                 suppressHydrationWarning
             >
                 <div className="noise-overlay" aria-hidden="true" />
-                {children}
+                <CityProvider>
+                    <CartProvider>
+                        {children}
+                        <CartDrawer />
+                    </CartProvider>
+                </CityProvider>
                 <ToastProvider />
             </body>
         </html>
     );
 }
+

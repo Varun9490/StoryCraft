@@ -1,0 +1,87 @@
+alerts:
+  - rule: DEPLOYMENT_FAILED
+    disabled: false
+  - rule: DOMAIN_FAILED
+    disabled: false
+
+databases:
+  - engine: MONGODB
+    name: storycraft-db
+    production: true
+    cluster_name: storycraft-cluster
+    db_name: storycraft
+    db_user: dbadmin
+
+services:
+  - name: storycraft-web
+    github:
+      repo: your-github-username/storycraft
+      branch: main
+      deploy_on_push: true
+    build_command: npm run build
+    run_command: npm start
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: professional-xs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${APP_URL}
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ${JWT_SECRET}
+      - key: MONGODB_URI
+        scope: RUN_TIME
+        type: SECRET
+        value: ${MONGODB_URI}
+      - key: CLOUDINARY_CLOUD_NAME
+        scope: RUN_AND_BUILD_TIME
+        value: ${CLOUDINARY_CLOUD_NAME}
+      - key: CLOUDINARY_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: ${CLOUDINARY_API_KEY}
+      - key: CLOUDINARY_API_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ${CLOUDINARY_API_SECRET}
+      - key: GEMINI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: ${GEMINI_API_KEY}
+      - key: RAZORPAY_KEY_ID
+        scope: RUN_TIME
+        type: SECRET
+        value: ${RAZORPAY_KEY_ID}
+      - key: RAZORPAY_KEY_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ${RAZORPAY_KEY_SECRET}
+      - key: DO_SPACES_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: ${DO_SPACES_KEY}
+      - key: DO_SPACES_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ${DO_SPACES_SECRET}
+      - key: DO_SPACES_ENDPOINT
+        scope: RUN_TIME
+        value: ${DO_SPACES_ENDPOINT}
+      - key: DO_SPACES_BUCKET
+        scope: RUN_TIME
+        value: ${DO_SPACES_BUCKET}
+      - key: DO_SPACES_CDN_URL
+        scope: RUN_TIME
+        value: ${DO_SPACES_CDN_URL}
+      - key: MESHY_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: ${MESHY_API_KEY}
+    health_check:
+      http_path: /api/health
+    routes:
+      - path: /

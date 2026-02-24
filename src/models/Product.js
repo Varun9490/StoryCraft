@@ -51,7 +51,7 @@ const ProductSchema = new mongoose.Schema(
         },
         city: {
             type: String,
-            enum: ['Visakhapatnam', 'Hyderabad'],
+            enum: ['Visakhapatnam', 'Hyderabad', 'Chennai', 'Kolkata'],
             default: 'Visakhapatnam',
         },
         stock: {
@@ -79,6 +79,11 @@ const ProductSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        faq_generation_count: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
         material: {
             type: String,
             default: '',
@@ -90,6 +95,11 @@ const ProductSchema = new mongoose.Schema(
         model_3d_url: {
             type: String,
             default: null,
+        },
+        model_3d_status: {
+            type: String,
+            enum: ['none', 'generating', 'ready', 'failed'],
+            default: 'none',
         },
     },
     { timestamps: true }

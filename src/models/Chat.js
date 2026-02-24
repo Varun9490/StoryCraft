@@ -31,7 +31,7 @@ const ChatSchema = new mongoose.Schema(
                 },
                 message_type: {
                     type: String,
-                    enum: ['text', 'image', 'ai_preview'],
+                    enum: ['text', 'image', 'aipreview', 'customization_request'],
                     default: 'text',
                 },
                 image_url: {
@@ -54,6 +54,20 @@ const ChatSchema = new mongoose.Schema(
         },
         last_message_at: {
             type: Date,
+        },
+        customization_status: {
+            type: String,
+            enum: ['none', 'requested', 'preview_generated', 'confirmed', 'cancelled'],
+            default: 'none',
+        },
+        customization_reference_image: {
+            type: String,
+            default: '',
+        },
+        customization_description: {
+            type: String,
+            maxlength: 500,
+            default: '',
         },
     },
     { timestamps: true }

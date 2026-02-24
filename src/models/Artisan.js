@@ -20,7 +20,7 @@ const ArtisanSchema = new mongoose.Schema(
         },
         city: {
             type: String,
-            enum: ['Visakhapatnam', 'Hyderabad'],
+            enum: ['Visakhapatnam', 'Hyderabad', 'Chennai', 'Kolkata'],
             default: 'Visakhapatnam',
         },
         village: {

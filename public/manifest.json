@@ -1,0 +1,29 @@
+{
+    "name": "StoryCraft — Artisan Marketplace",
+    "short_name": "StoryCraft",
+    "description": "Discover authentic handcrafted products from Indian artisans",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#06060A",
+    "theme_color": "#E07038",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "shopping",
+        "lifestyle"
+    ],
+    "lang": "en-IN"
+}

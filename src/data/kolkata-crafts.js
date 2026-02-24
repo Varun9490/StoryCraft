@@ -1,0 +1,38 @@
+export const kolkataCrafts = [
+    {
+        id: 1,
+        name: 'Kantha Embroidery',
+        origin: 'Rural West Bengal',
+        description: 'Running stitches on old saris transformed into stories — every stitch a memory, every thread a life.',
+        accentColor: '#E07038',
+        artisanCount: 134,
+        imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800',
+    },
+    {
+        id: 2,
+        name: 'Dokra Metal Casting',
+        origin: 'Bankura District, West Bengal',
+        description: 'Tribal bell-metal figurines cast by the same lost-wax technique for 4,500 years — among the world oldest craft traditions.',
+        accentColor: '#D4A853',
+        artisanCount: 38,
+        imageUrl: 'https://images.unsplash.com/photo-1526779259212-939e64788e3c?w=800',
+    },
+    {
+        id: 3,
+        name: 'Baluchari Silk',
+        origin: 'Bishnupur, West Bengal',
+        description: 'Epic narratives of Ramayana and Mahabharata woven into silk sari borders — each telling a story in thread.',
+        accentColor: '#8B5CF6',
+        artisanCount: 52,
+        imageUrl: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800',
+    },
+    {
+        id: 4,
+        name: 'Terracotta Sculpture',
+        origin: 'Bishnupur + Krishnanagar, West Bengal',
+        description: 'Red river clay shaped into divine forms — temple horses, Durga idols, intricate panels that define Bengal identity.',
+        accentColor: '#52B788',
+        artisanCount: 71,
+        imageUrl: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800',
+    },
+];

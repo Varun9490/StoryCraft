@@ -1,10 +1,14 @@
 import jwt from 'jsonwebtoken';
 
-export function signJWT(payload) {
+// ── Access Token (short-lived: 15 min) ──
+export function signAccessToken(payload) {
     return jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m',
     });
 }
+
+// Backward-compatible alias
+export const signJWT = signAccessToken;
 
 export function verifyJWT(token) {
     try {
@@ -14,13 +18,39 @@ export function verifyJWT(token) {
     }
 }
 
+// ── Refresh Token (long-lived: 30 days) ──
+export function signRefreshToken(payload) {
+    return jwt.sign(payload, process.env.JWT_SECRET + '_refresh', {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY || '30d',
+    });
+}
+
+export function verifyRefreshToken(token) {
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET + '_refresh');
+    } catch {
+        return null;
+    }
+}
+
+// ── Cookie Helpers ──
 export function setAuthCookie(response, token) {
     response.cookies.set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 604800, // 7 days
+        maxAge: 900, // 15 minutes
         path: '/',
+    });
+}
+
+export function setRefreshCookie(response, token) {
+    response.cookies.set('refreshToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 2592000, // 30 days
+        path: '/api/auth/refresh',
     });
 }
 
@@ -31,5 +61,15 @@ export function clearAuthCookie(response) {
         sameSite: 'strict',
         maxAge: 0,
         path: '/',
+    });
+}
+
+export function clearRefreshCookie(response) {
+    response.cookies.set('refreshToken', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 0,
+        path: '/api/auth/refresh',
     });
 }

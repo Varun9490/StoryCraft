@@ -1,0 +1,38 @@
+export const chennaiCrafts = [
+    {
+        id: 1,
+        name: 'Kanchipuram Silk Weaving',
+        origin: 'Kanchipuram, Tamil Nadu',
+        description: 'Mulberry silk woven with real gold and silver zari threads. Sacred geometry patterns inspired by temple architecture.',
+        accentColor: '#D4A853',
+        artisanCount: 89,
+        imageUrl: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800',
+    },
+    {
+        id: 2,
+        name: 'Tanjore Painting',
+        origin: 'Thanjavur, Tamil Nadu',
+        description: 'Gold foil and gemstone embellishments on wooden panels depicting deities — a 1600-year-old devotional art form.',
+        accentColor: '#E07038',
+        artisanCount: 42,
+        imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800',
+    },
+    {
+        id: 3,
+        name: 'Bronze Casting (Chola Style)',
+        origin: 'Swamimalai, Near Chennai',
+        description: 'The lost-wax casting technique of the Chola dynasty — temple bronzes that have outlasted empires.',
+        accentColor: '#8B5CF6',
+        artisanCount: 27,
+        imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
+    },
+    {
+        id: 4,
+        name: 'Kolam Rice Art',
+        origin: 'Chennai Doorsteps, Tamil Nadu',
+        description: 'Sacred geometric floor art drawn at dawn with rice flour — a living mathematical tradition practiced by millions.',
+        accentColor: '#52B788',
+        artisanCount: 15,
+        imageUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800',
+    },
+];
