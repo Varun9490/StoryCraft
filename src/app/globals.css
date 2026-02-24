@@ -1,26 +1,302 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-dark: #050505;
+  --color-bg-warm: #F9F6F1;
+  --color-primary: #C4622D;
+  --color-secondary: #E8A838;
+  --color-text-dark: #1A1209;
+  --color-text-muted: #6B5E4E;
+  --color-surface: #FFFFFF;
+  --color-border: #E5DDD4;
+  --color-dark-earthy: #1A1209;
+  --color-dark-ai: #0E0C08;
+
+  --font-playfair: 'Playfair Display', serif;
+  --font-inter: 'Inter', sans-serif;
+  --font-space: 'Space Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ===== BASE STYLES ===== */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-dark);
+  color: var(--color-text-dark);
+  font-family: var(--font-inter);
+  overflow-x: hidden;
+}
+
+/* ===== NOISE TEXTURE OVERLAY ===== */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ===== STARFIELD ===== */
+.starfield {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.starfield .star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s infinite ease-in-out alternate;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* ===== CINEMATIC TEXT REVEAL ===== */
+.text-reveal-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.text-reveal-char.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== SCROLL INDICATOR ===== */
+@keyframes scrollBounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(8px);
+  }
+
+  60% {
+    transform: translateY(4px);
+  }
+}
+
+.scroll-indicator {
+  animation: scrollBounce 2s infinite;
+}
+
+/* ===== MARQUEE ===== */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  animation: marqueeScroll 20s linear infinite;
+  width: max-content;
+}
+
+/* ===== PIN PULSE ===== */
+@keyframes pinPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(196, 98, 45, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 0 12px rgba(196, 98, 45, 0);
+  }
+}
+
+.pulse-pin {
+  animation: pinPulse 2s infinite;
+}
+
+/* ===== COUNTER ANIMATION ===== */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== CARD HOVER ===== */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.04);
+}
+
+.product-image {
+  transition: transform 0.4s ease;
+}
+
+/* ===== GLASSMORPHISM ===== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ===== DONUT CHART ===== */
+@keyframes donutSpin {
+  0% {
+    stroke-dashoffset: 283;
+  }
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C4622D;
+  border-radius: 3px;
+}
+
+/* ===== SECTION TRANSITIONS ===== */
+.section-dark {
+  background-color: #050505 !important;
+  color: #FFFFFF;
+}
+
+.section-warm {
+  background-color: #F9F6F1 !important;
+  color: #1A1209;
+}
+
+.section-earthy {
+  background-color: #1A1209 !important;
+  color: #FFFFFF;
+}
+
+.section-ai {
+  background-color: #0E0C08 !important;
+  color: #FFFFFF;
+}
+
+/* ===== WATERCOLOR WASH ===== */
+.watercolor-wash {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(196, 98, 45, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse at 70% 30%, rgba(232, 168, 56, 0.06) 0%, transparent 60%);
+  filter: blur(40px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===== GLOBE SEQUENCE ===== */
+.globe-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+/* ===== KEN BURNS ===== */
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+
+  100% {
+    transform: scale(1.1) translate(-2%, -1%);
+  }
+}
+
+.ken-burns {
+  animation: kenBurns 12s ease-in-out infinite alternate;
+}
+
+/* ===== FLYING POSTERS ===== */
+.poster-card {
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease;
+}
+
+.poster-card:hover {
+  transform: translateY(-8px) rotate(0deg) !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+/* ===== BACK TO TOP FAB ===== */
+.fab-back-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9990;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #C4622D;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(196, 98, 45, 0.4);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  border: none;
+}
+
+.fab-back-top:hover {
+  transform: scale(1.1);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hero-heading {
+    font-size: 2.5rem !important;
+  }
 }

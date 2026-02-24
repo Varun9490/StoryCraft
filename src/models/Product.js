@@ -1,0 +1,100 @@
+import mongoose from 'mongoose';
+
+const ProductSchema = new mongoose.Schema(
+    {
+        artisan: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Artisan',
+            required: true,
+        },
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 120,
+        },
+        description: {
+            type: String,
+            required: true,
+            maxlength: 2500,
+        },
+        category: {
+            type: String,
+            enum: [
+                'toys',
+                'textiles',
+                'pottery',
+                'jewelry',
+                'metalwork',
+                'woodwork',
+                'paintings',
+                'shell_craft',
+                'other',
+            ],
+            required: true,
+        },
+        images: [
+            {
+                url: { type: String },
+                public_id: { type: String },
+                alt: { type: String, default: '' },
+            },
+        ],
+        price: {
+            type: Number,
+            required: true,
+            min: 1,
+        },
+        suggested_price_range: {
+            min: { type: Number },
+            max: { type: Number },
+        },
+        city: {
+            type: String,
+            enum: ['Visakhapatnam', 'Hyderabad'],
+            default: 'Visakhapatnam',
+        },
+        stock: {
+            type: Number,
+            default: 1,
+            min: 0,
+        },
+        is_customizable: {
+            type: Boolean,
+            default: false,
+        },
+        is_published: {
+            type: Boolean,
+            default: false,
+        },
+        tags: [{ type: String }],
+        ai_generated_faqs: [
+            {
+                question: String,
+                answer: String,
+                approved: { type: Boolean, default: false },
+            },
+        ],
+        views: {
+            type: Number,
+            default: 0,
+        },
+        material: {
+            type: String,
+            default: '',
+        },
+        craft_technique: {
+            type: String,
+            default: '',
+        },
+        model_3d_url: {
+            type: String,
+            default: null,
+        },
+    },
+    { timestamps: true }
+);
+
+ProductSchema.index({ artisan: 1, city: 1, category: 1, is_published: 1 });
+
+export default mongoose.models.Product || mongoose.model('Product', ProductSchema);
