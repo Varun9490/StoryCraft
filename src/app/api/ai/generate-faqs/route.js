@@ -4,9 +4,19 @@ import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
 import { getFlashModel, generateWithRetry, parseAIJson } from '@/lib/gemini';
+import { aiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request) {
     try {
+        const limit = aiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
 
         // Auth — artisan only
@@ -18,7 +28,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can generate FAQs' }, { status: 403 });
         }
 
-        const body = await request.json();
+        
         const { title, description, category, material, craft_technique, city, productId } = body;
 
         // Validate

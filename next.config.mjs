@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
+import withPWAInit from '@ducanh2912/next-pwa';
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+});
 
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
@@ -39,6 +47,7 @@ const nextConfig = {
       bodySizeLimit: '6mb',
     },
   },
+  turbopack: {},
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
   },
@@ -46,4 +55,4 @@ const nextConfig = {
   poweredByHeader: false,
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

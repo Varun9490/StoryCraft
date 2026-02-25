@@ -2,9 +2,19 @@ import { NextResponse } from 'next/server';
 import { verifyRefreshToken, signAccessToken, setAuthCookie } from '@/lib/auth';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
+import { authLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request) {
     try {
+        const limit = authLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         const refreshToken = request.cookies.get('refreshToken')?.value;
         if (!refreshToken) {
             return NextResponse.json({ success: false, error: 'No refresh token' }, { status: 401 });

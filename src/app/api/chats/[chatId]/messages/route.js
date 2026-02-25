@@ -2,10 +2,20 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Chat from '@/models/Chat';
 import { verifyJWT } from '@/lib/auth';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 // POST — REST fallback for sending a message
 export async function POST(request, { params }) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
         const { chatId } = await params;
 
@@ -24,7 +34,7 @@ export async function POST(request, { params }) {
             return NextResponse.json({ success: false, error: 'Not a participant' }, { status: 403 });
         }
 
-        const body = await request.json();
+        
         const { content, messageType = 'text', imageUrl = '' } = body;
 
         if (!content && !imageUrl) {

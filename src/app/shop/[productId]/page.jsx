@@ -9,6 +9,11 @@ import ProductImageGallery from '@/components/shop/ProductImageGallery';
 import { useCart } from '@/contexts/CartContext';
 import FAQAccordion from '@/components/shop/FAQAccordion';
 import toast from 'react-hot-toast';
+import dynamic from 'next/dynamic';
+import { useAuth } from '@/hooks/useAuth';
+import WishlistButton from '@/components/ui/WishlistButton';
+
+const ProductModelViewer = dynamic(() => import('@/components/three/ProductModelViewer'), { ssr: false });
 
 export default function ProductDetailPage({ params }) {
     const { productId } = use(params);
@@ -17,6 +22,28 @@ export default function ProductDetailPage({ params }) {
     const [quantity, setQuantity] = useState(1);
     const { dispatch } = useCart();
     const [faqs, setFaqs] = useState([]);
+    const [activeTab, setActiveTab] = useState('photos');
+    const [isGenerating3D, setIsGenerating3D] = useState(false);
+    const { user } = useAuth();
+
+    const handleGenerate3D = async () => {
+        setIsGenerating3D(true);
+        try {
+            const res = await fetch(`/api/products/${productId}/generate-3d`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                setProduct((prev) => ({ ...prev, model_3d_url: data.data.url, model_3d_status: 'ready' }));
+                setActiveTab('3d');
+                toast.success('3D model generated successfully!');
+            } else {
+                toast.error(data.error || 'Failed to generate 3D model');
+            }
+        } catch {
+            toast.error('An error occurred');
+        } finally {
+            setIsGenerating3D(false);
+        }
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -103,6 +130,7 @@ export default function ProductDetailPage({ params }) {
 
     const artisanName = product.artisan?.user?.name || 'Artisan';
     const artisanId = product.artisan?._id;
+    const isOwner = user?.role === 'artisan' && user?.artisanProfile === artisanId;
 
     return (
         <main className="min-h-screen bg-[#050505] pt-24">
@@ -121,7 +149,51 @@ export default function ProductDetailPage({ params }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {/* Left: Images */}
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                        <ProductImageGallery images={product.images} />
+                        <div className="flex items-center gap-4 mb-6">
+                            <button
+                                onClick={() => setActiveTab('photos')}
+                                className={`relative px-2 py-1 text-sm font-medium transition-colors ${activeTab === 'photos' ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
+                            >
+                                Photos
+                                {activeTab === 'photos' && (
+                                    <motion.div layoutId="tab-indicator" className="absolute bottom-[-4px] left-0 w-full h-[2px] bg-[#C4622D]" />
+                                )}
+                            </button>
+                            {(product.model_3d_url || isOwner) && (
+                                <button
+                                    onClick={() => setActiveTab('3d')}
+                                    className={`relative px-2 py-1 text-sm font-medium transition-colors ${activeTab === '3d' ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
+                                >
+                                    3D View
+                                    {activeTab === '3d' && (
+                                        <motion.div layoutId="tab-indicator" className="absolute bottom-[-4px] left-0 w-full h-[2px] bg-[#C4622D]" />
+                                    )}
+                                </button>
+                            )}
+                        </div>
+
+                        {activeTab === 'photos' ? (
+                            <ProductImageGallery images={product.images} />
+                        ) : (
+                            <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px]">
+                                {product.model_3d_url && product.model_3d_status === 'ready' ? (
+                                    <ProductModelViewer modelUrl={product.model_3d_url} productTitle={product.title} />
+                                ) : isOwner ? (
+                                    <div className="text-center space-y-4">
+                                        <p className="text-white/50 text-sm">Showcase your product in immersive 3D using Meshy AI.</p>
+                                        <button
+                                            onClick={handleGenerate3D}
+                                            disabled={isGenerating3D}
+                                            className="px-6 py-2 bg-[#8B5CF6] text-white text-sm font-medium rounded-lg hover:brightness-110 disabled:opacity-50 transition-all"
+                                        >
+                                            {isGenerating3D ? 'Generating (Takes a minute)...' : 'Generate 3D Model ✨'}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="text-white/50">3D model not available yet.</p>
+                                )}
+                            </div>
+                        )}
                     </motion.div>
 
                     {/* Right: Info */}
@@ -136,10 +208,15 @@ export default function ProductDetailPage({ params }) {
                             </span>
                         </div>
 
-                        {/* Title */}
-                        <h1 className="text-3xl md:text-4xl font-bold text-white/90" style={{ fontFamily: 'var(--font-playfair)' }}>
-                            {product.title}
-                        </h1>
+                        {/* Title & Wishlist */}
+                        <div className="flex items-start justify-between gap-4">
+                            <h1 className="text-3xl md:text-4xl font-bold text-white/90 leading-tight" style={{ fontFamily: 'var(--font-playfair)' }}>
+                                {product.title}
+                            </h1>
+                            <div className="mt-2">
+                                <WishlistButton productId={product._id} size="md" />
+                            </div>
+                        </div>
 
                         {/* Artisan */}
                         <Link

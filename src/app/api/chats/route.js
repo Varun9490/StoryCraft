@@ -3,6 +3,8 @@ import connectDB from '@/lib/db';
 import Chat from '@/models/Chat';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 // GET — list user's chats
 export async function GET(request) {
@@ -30,6 +32,14 @@ export async function GET(request) {
 // POST — create or get existing chat
 export async function POST(request) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
 
         const token = request.cookies.get('auth_token')?.value;
@@ -37,7 +47,7 @@ export async function POST(request) {
         const decoded = verifyJWT(token);
         if (!decoded) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
-        const body = await request.json();
+        
         const { artisanId, productId, initialMessage, messageType, referenceImageUrl, customizationDescription } = body;
 
         if (!artisanId || !productId) {

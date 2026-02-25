@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/auth';
 import { getRazorpayInstance } from '@/lib/razorpay';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         const token = request.cookies.get('auth_token')?.value;
         if (!token) {
             return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
@@ -16,7 +26,7 @@ export async function POST(request) {
             );
         }
 
-        const body = await request.json();
+        
         const { amount, currency, receipt } = body;
 
         if (!amount || amount <= 0) {

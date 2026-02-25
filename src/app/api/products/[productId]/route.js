@@ -1,3 +1,5 @@
+import { sanitizeBody } from '@/lib/sanitize';
+import { apiLimiter } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/db';
@@ -5,6 +7,10 @@ import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import cloudinary from '@/lib/cloudinary';
 import { verifyJWT } from '@/lib/auth';
+
+
+
+
 
 // GET — single product
 export async function GET(request, { params }) {
@@ -68,6 +74,14 @@ export async function GET(request, { params }) {
 // PUT — update product (artisan owner only)
 export async function PUT(request, { params }) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
         const { productId } = await params;
 
@@ -94,7 +108,7 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ success: false, error: 'You can only edit your own products' }, { status: 403 });
         }
 
-        const body = await request.json();
+        
         const allowedFields = [
             'title', 'description', 'category', 'price', 'images',
             'city', 'stock', 'is_customizable', 'tags',
@@ -128,6 +142,14 @@ export async function PUT(request, { params }) {
 // DELETE — delete product (artisan owner only)
 export async function DELETE(request, { params }) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
         const { productId } = await params;
 

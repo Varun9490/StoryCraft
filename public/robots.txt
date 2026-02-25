@@ -5,4 +5,4 @@ Disallow: /api/
 Disallow: /checkout
 Disallow: /cart
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://storycraft.vercel.app/sitemap.xml

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { aiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 // Simple IP-based rate limiter
 const rateLimitMap = new Map();
@@ -22,6 +24,14 @@ function checkRateLimit(ip) {
 
 export async function POST(request) {
     try {
+        const limit = aiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         // Rate limit
         const forwarded = request.headers.get('x-forwarded-for');
         const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
@@ -32,7 +42,7 @@ export async function POST(request) {
             );
         }
 
-        const body = await request.json();
+        
         const { message, imageBase64, imageMimeType, sessionHistory } = body;
 
         if (!message || message.length > 500) {

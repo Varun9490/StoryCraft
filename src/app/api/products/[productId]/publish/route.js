@@ -3,9 +3,19 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function PUT(request, { params }) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
         const { productId } = await params;
 

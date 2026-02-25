@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { signJWT, setAuthCookie } from '@/lib/auth';
+import { signJWT, setAuthCookie, signRefreshToken, setRefreshCookie } from '@/lib/auth';
+import { authLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 import User from '@/models/User';
 import Artisan from '@/models/Artisan';
 
@@ -8,8 +10,15 @@ export async function POST(req) {
     try {
         await connectDB();
 
-        const { name, email, password, phone, role, craft_specialty, years_of_experience, city } =
-            await req.json();
+        const limit = authLimiter(req);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await req.json();
+        const body = sanitizeBody(rawBody);
+
+        const { name, email, password, phone, role, craft_specialty, years_of_experience, city } = body;
 
         // Validate required fields
         if (!name || !email || !password || !role) {
@@ -85,6 +94,7 @@ export async function POST(req) {
 
         // Sign JWT
         const token = signJWT({ userId: user._id.toString(), role: user.role });
+        const refreshToken = signRefreshToken({ userId: user._id.toString() });
 
         const safeUser = {
             _id: user._id,
@@ -100,6 +110,7 @@ export async function POST(req) {
         );
 
         setAuthCookie(response, token);
+        setRefreshCookie(response, refreshToken);
         return response;
     } catch (error) {
         console.error('Register error:', error);

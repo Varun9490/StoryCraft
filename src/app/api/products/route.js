@@ -3,6 +3,8 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 // GET — list products with filters (public)
 export async function GET(request) {
@@ -111,6 +113,14 @@ export async function GET(request) {
 // POST — create product (artisan only)
 export async function POST(request) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
 
         const token = request.cookies.get('auth_token')?.value;
@@ -136,7 +146,6 @@ export async function POST(request) {
             );
         }
 
-        const body = await request.json();
         const {
             title, description, category, price, images,
             city, stock, is_customizable, tags,
@@ -146,7 +155,7 @@ export async function POST(request) {
         // Validate required fields
         if (!title || !description || !category || !price || !images || images.length === 0) {
             return NextResponse.json(
-                { success: false, error: 'Missing required fields: title, description, category, price, and at least 1 image' },
+                { success: false, error: 'Missing required fields' },
                 { status: 400 }
             );
         }

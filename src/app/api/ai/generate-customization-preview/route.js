@@ -6,9 +6,19 @@ import { verifyJWT } from '@/lib/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import { getIO } from '@/lib/socket-server';
+import { aiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request) {
     try {
+        const limit = aiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
 
         const token = request.cookies.get('auth_token')?.value;
@@ -19,7 +29,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can generate previews' }, { status: 403 });
         }
 
-        const body = await request.json();
+        
         const { chatId, productImageUrl, customizationPrompt, referenceImageUrl } = body;
 
         if (!chatId || !productImageUrl || !customizationPrompt) {

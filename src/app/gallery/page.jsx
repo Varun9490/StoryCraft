@@ -3,12 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import Image from 'next/image';
+import InfiniteMenu from '@/components/reactbits/InfiniteMenu';
 
 export default function GalleryPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedItem, setSelectedItem] = useState(null);
 
     useEffect(() => {
         const fetchGallery = async () => {
@@ -60,72 +59,17 @@ export default function GalleryPage() {
                     ) : items.length === 0 ? (
                         <div className="text-center py-20">
                             <div className="text-5xl mb-4 opacity-30">🎨</div>
-                            <p className="text-white/30">No gallery items yet. Be the first to customize a craft!</p>
+                            <p className="text-white/30 mb-8">No gallery items yet. Be the first to customize a craft!</p>
+                            <a href="/shop" className="px-6 py-3 bg-[#E07038] text-white rounded-xl hover:brightness-110 font-medium">Explore Shop</a>
                         </div>
                     ) : (
-                        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-                            {items.map((item, i) => (
-                                <motion.div
-                                    key={item.id || i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="break-inside-avoid rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden group cursor-pointer hover:border-white/20 transition-all"
-                                    onClick={() => setSelectedItem(item)}
-                                >
-                                    <div className="relative aspect-auto overflow-hidden">
-                                        <Image
-                                            src={item.image_url}
-                                            alt={item.product_title}
-                                            width={400}
-                                            height={item.id ? (300 + (parseInt(item.id, 10) % 3) * 60) : 350}
-                                            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
-                                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                        />
-                                    </div>
-                                    <div className="p-3">
-                                        <p className="text-xs font-medium text-white/70 truncate">{item.product_title}</p>
-                                        <p className="text-[10px] text-white/30 mt-0.5">by {item.artisan_name}</p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                        <InfiniteMenu items={items.map(i => ({
+                            image: i.image_url,
+                            title: i.product_title,
+                            description: `by ${i.artisan_name}`
+                        }))} />
                     )}
                 </div>
-
-                {/* Lightbox */}
-                {selectedItem && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-8"
-                        onClick={() => setSelectedItem(null)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="max-w-2xl max-h-[80vh] w-full rounded-2xl overflow-hidden bg-[#0E0C08] border border-white/10"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="relative aspect-video">
-                                <Image
-                                    src={selectedItem.image_url}
-                                    alt={selectedItem.product_title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="640px"
-                                />
-                            </div>
-                            <div className="p-5">
-                                <h3 className="text-lg font-bold text-white/90" style={{ fontFamily: 'var(--font-playfair)' }}>
-                                    {selectedItem.product_title}
-                                </h3>
-                                <p className="text-sm text-white/40 mt-1">Crafted by {selectedItem.artisan_name}</p>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
             </main>
         </>
     );

@@ -4,6 +4,8 @@ import Order from '@/models/Order';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 // GET — list orders
 export async function GET(request) {
@@ -51,6 +53,14 @@ export async function GET(request) {
 // POST — create order (buyer only)
 export async function POST(request) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
 
         const token = request.cookies.get('auth_token')?.value;
@@ -68,7 +78,7 @@ export async function POST(request) {
             );
         }
 
-        const body = await request.json();
+        
         const { items, delivery_address, razorpay_payment_id, razorpay_order_id } = body;
 
         if (!items || items.length === 0) {

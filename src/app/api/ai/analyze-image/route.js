@@ -3,9 +3,19 @@ import connectDB from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { parseAIJson } from '@/lib/gemini';
+import { aiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request) {
     try {
+        const limit = aiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
 
         const token = request.cookies.get('auth_token')?.value;
@@ -16,7 +26,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can use image analysis' }, { status: 403 });
         }
 
-        const body = await request.json();
+        
         const { imageUrl } = body;
 
         if (!imageUrl || !imageUrl.startsWith('https://res.cloudinary.com')) {

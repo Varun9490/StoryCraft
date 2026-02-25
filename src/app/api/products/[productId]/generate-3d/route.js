@@ -3,14 +3,23 @@ import { verifyJWT } from '@/lib/auth';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
-import { aiLimiter } from '@/lib/rate-limit';
+import { aiLimiter, apiLimiter } from '@/lib/rate-limit';
 import { checkModelExists, uploadGLBToSpaces } from '@/lib/spaces';
+import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request, { params }) {
     try {
-        // Rate limit
-        const limit = aiLimiter(request);
+        const limit = apiLimiter(request);
         if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
+        // Rate limit
+        const aiLimit = aiLimiter(request);
+        if (!aiLimit.allowed) {
             return NextResponse.json({ success: false, error: 'Too many requests.' }, { status: 429 });
         }
 

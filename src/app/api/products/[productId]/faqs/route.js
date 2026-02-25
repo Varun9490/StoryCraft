@@ -3,6 +3,8 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
+import { apiLimiter } from '@/lib/rate-limit';
+import { sanitizeBody } from '@/lib/sanitize';
 
 // GET — public: fetch only approved FAQs
 export async function GET(request, { params }) {
@@ -33,6 +35,14 @@ export async function GET(request, { params }) {
 // PUT — artisan owner: replace all FAQs
 export async function PUT(request, { params }) {
     try {
+        const limit = apiLimiter(request);
+        if (!limit.allowed) {
+            return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
+        }
+
+        const rawBody = await request.json();
+        const body = sanitizeBody(rawBody);
+
         await connectDB();
         const { productId } = await params;
 
@@ -54,7 +64,7 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
         }
 
-        const body = await request.json();
+        
         const { faqs } = body;
 
         if (!Array.isArray(faqs) || faqs.length > 10) {
