@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
     { label: "Story", href: "#story" },
@@ -16,6 +17,7 @@ export default function Navbar() {
     const [isOnLight, setIsOnLight] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const { scrollY } = useScroll();
+    const { user, loading, logout } = useAuth();
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50);
@@ -87,30 +89,61 @@ export default function Navbar() {
                             {item.label}
                         </a>
                     ))}
-                    <a
-                        href="/login"
-                        id="nav-sign-in"
-                        className={`text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
-                            ? "text-[#1A1209]/70 hover:text-[#C4622D]"
-                            : "text-white/70 hover:text-[#C4622D]"
-                            }`}
-                        style={{ fontFamily: "var(--font-inter)" }}
-                    >
-                        Sign In
-                    </a>
-                    <a
-                        href="/register"
-                        id="nav-begin-story"
-                        className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-lg"
-                        style={{
-                            fontFamily: "var(--font-inter)",
-                            background: "#C4622D",
-                            color: "#fff",
-                            boxShadow: "0 4px 16px rgba(196,98,45,0.3)",
-                        }}
-                    >
-                        Begin Your Story
-                    </a>
+                    {!loading && (
+                        user ? (
+                            <>
+                                <a
+                                    href="/dashboard"
+                                    className={`text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
+                                        ? "text-[#1A1209]/70 hover:text-[#C4622D]"
+                                        : "text-white/70 hover:text-[#C4622D]"
+                                        }`}
+                                    style={{ fontFamily: "var(--font-inter)" }}
+                                >
+                                    Dashboard
+                                </a>
+                                <button
+                                    onClick={logout}
+                                    className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300"
+                                    style={{
+                                        fontFamily: "var(--font-inter)",
+                                        background: "transparent",
+                                        border: "1px solid #C4622D",
+                                        color: "#C4622D",
+                                    }}
+                                >
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <a
+                                    href="/login"
+                                    id="nav-sign-in"
+                                    className={`text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
+                                        ? "text-[#1A1209]/70 hover:text-[#C4622D]"
+                                        : "text-white/70 hover:text-[#C4622D]"
+                                        }`}
+                                    style={{ fontFamily: "var(--font-inter)" }}
+                                >
+                                    Sign In
+                                </a>
+                                <a
+                                    href="/register"
+                                    id="nav-begin-story"
+                                    className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-lg"
+                                    style={{
+                                        fontFamily: "var(--font-inter)",
+                                        background: "#C4622D",
+                                        color: "#fff",
+                                        boxShadow: "0 4px 16px rgba(196,98,45,0.3)",
+                                    }}
+                                >
+                                    Begin Your Story
+                                </a>
+                            </>
+                        )
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -158,29 +191,64 @@ export default function Navbar() {
                             {item.label}
                         </a>
                     ))}
-                    <a
-                        href="/login"
-                        onClick={() => setMobileOpen(false)}
-                        className={`block py-3 text-sm font-medium border-b transition-colors ${isOnLight
-                            ? "border-[#E5DDD4] text-[#1A1209]/70 hover:text-[#C4622D]"
-                            : "border-white/10 text-white/70 hover:text-[#C4622D]"
-                            }`}
-                        style={{ fontFamily: "var(--font-inter)" }}
-                    >
-                        Sign In
-                    </a>
-                    <a
-                        href="/register"
-                        onClick={() => setMobileOpen(false)}
-                        className="block mt-3 text-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
-                        style={{
-                            fontFamily: "var(--font-inter)",
-                            background: "#C4622D",
-                            color: "#fff",
-                        }}
-                    >
-                        Begin Your Story
-                    </a>
+                    {!loading && (
+                        user ? (
+                            <>
+                                <a
+                                    href="/dashboard"
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`block py-3 text-sm font-medium border-b transition-colors ${isOnLight
+                                        ? "border-[#E5DDD4] text-[#1A1209]/70 hover:text-[#C4622D]"
+                                        : "border-white/10 text-white/70 hover:text-[#C4622D]"
+                                        }`}
+                                    style={{ fontFamily: "var(--font-inter)" }}
+                                >
+                                    Dashboard
+                                </a>
+                                <button
+                                    onClick={() => {
+                                        logout();
+                                        setMobileOpen(false);
+                                    }}
+                                    className="block w-full mt-3 text-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
+                                    style={{
+                                        fontFamily: "var(--font-inter)",
+                                        background: "transparent",
+                                        border: "1px solid #C4622D",
+                                        color: "#C4622D",
+                                    }}
+                                >
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <a
+                                    href="/login"
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`block py-3 text-sm font-medium border-b transition-colors ${isOnLight
+                                        ? "border-[#E5DDD4] text-[#1A1209]/70 hover:text-[#C4622D]"
+                                        : "border-white/10 text-white/70 hover:text-[#C4622D]"
+                                        }`}
+                                    style={{ fontFamily: "var(--font-inter)" }}
+                                >
+                                    Sign In
+                                </a>
+                                <a
+                                    href="/register"
+                                    onClick={() => setMobileOpen(false)}
+                                    className="block mt-3 text-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
+                                    style={{
+                                        fontFamily: "var(--font-inter)",
+                                        background: "#C4622D",
+                                        color: "#fff",
+                                    }}
+                                >
+                                    Begin Your Story
+                                </a>
+                            </>
+                        )
+                    )}
                 </motion.div>
             )}
         </motion.nav>

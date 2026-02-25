@@ -2,8 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 
 export default function AuthLayout({ children }) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     return (
         <div className="relative min-h-screen flex items-center justify-center overflow-hidden"
             style={{ background: '#050505' }}
@@ -22,7 +28,7 @@ export default function AuthLayout({ children }) {
 
             {/* Starfield particles */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {Array.from({ length: 50 }).map((_, i) => (
+                {mounted && Array.from({ length: 50 }).map((_, i) => (
                     <motion.div
                         key={i}
                         className="absolute rounded-full bg-white"

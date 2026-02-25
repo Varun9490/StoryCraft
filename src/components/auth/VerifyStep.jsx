@@ -11,23 +11,20 @@ export default function VerifyStep({ user, mode = 'register' }) {
     const isLogin = mode === 'login';
 
     useEffect(() => {
+        if (countdown === 0) {
+            const role = user?.role || 'buyer';
+            router.push(
+                role === 'artisan' ? '/dashboard/artisan' : '/dashboard/buyer'
+            );
+            return;
+        }
+
         const interval = setInterval(() => {
-            setCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    // Redirect based on role
-                    const role = user?.role || 'buyer';
-                    router.push(
-                        role === 'artisan' ? '/dashboard/artisan' : '/dashboard/buyer'
-                    );
-                    return 0;
-                }
-                return prev - 1;
-            });
+            setCountdown((prev) => prev - 1);
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [router, user]);
+    }, [countdown, router, user]);
 
     return (
         <div className="text-center py-8">
