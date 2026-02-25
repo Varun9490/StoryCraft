@@ -90,11 +90,13 @@ export default function FAQManager({ productId, productData }) {
             </div>
 
             {/* Generate trigger */}
-            <FAQGeneratorTrigger
-                productData={{ ...productData, productId }}
-                onFAQsGenerated={handleFAQsGenerated}
-                disabled={false}
-            />
+            {faqs.length === 0 && (
+                <FAQGeneratorTrigger
+                    productData={{ ...productData, productId }}
+                    onFAQsGenerated={handleFAQsGenerated}
+                    disabled={false}
+                />
+            )}
 
             <hr className="border-white/5" />
 

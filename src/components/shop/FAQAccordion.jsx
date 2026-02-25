@@ -1,16 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function FAQAccordion({ faqs = [], productTitle }) {
-    const [openIndex, setOpenIndex] = useState(null);
-
     if (faqs.length === 0) return null;
-
-    const toggle = (index) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
 
     return (
         <div className="border-t border-white/10 pt-6 mt-6">
@@ -26,48 +24,18 @@ export default function FAQAccordion({ faqs = [], productTitle }) {
                 </span>
             </div>
 
-            <div className="divide-y divide-white/[0.06]">
-                {faqs.map((faq, index) => {
-                    const isOpen = openIndex === index;
-                    return (
-                        <div key={index} className={isOpen ? 'border-l-2 border-l-[#C4622D] pl-4' : 'pl-0'}>
-                            <button
-                                onClick={() => toggle(index)}
-                                className="flex items-center justify-between w-full py-4 text-left gap-3 group"
-                            >
-                                <span className="text-sm font-medium text-white/70 group-hover:text-white/90 transition-colors">
-                                    {faq.question}
-                                </span>
-                                <motion.span
-                                    animate={{ rotate: isOpen ? 180 : 0 }}
-                                    transition={{ duration: 0.25 }}
-                                    className="text-white/30 flex-shrink-0"
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="6 9 12 15 18 9" />
-                                    </svg>
-                                </motion.span>
-                            </button>
-
-                            <AnimatePresence>
-                                {isOpen && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                        className="overflow-hidden"
-                                    >
-                                        <p className="text-sm text-white/50 leading-relaxed pb-4 pr-8">
-                                            {faq.answer}
-                                        </p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    );
-                })}
-            </div>
+            <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`} className="border-white/5 data-[state=open]:border-l-[2px] data-[state=open]:border-l-[#C4622D] data-[state=open]:pl-4 transition-all duration-300">
+                        <AccordionTrigger className="text-sm font-medium hover:no-underline hover:text-white/90">
+                            {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-white/50 leading-relaxed pr-8">
+                            {faq.answer}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
 
             {/* AI attribution */}
             <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-white/5">

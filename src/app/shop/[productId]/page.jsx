@@ -223,8 +223,10 @@ export default function ProductDetailPage({ params }) {
                         </div>
 
                         {/* Stock */}
-                        {product.stock <= 5 && product.stock > 0 && (
-                            <p className="text-xs text-amber-400/80">⚡ Only {product.stock} left in stock</p>
+                        {product.stock > 0 && (
+                            <p className={`text-xs ${product.stock <= 5 ? 'text-amber-400/80' : 'text-[#8B5CF6]/90'}`}>
+                                {product.stock <= 5 ? '⚡ Only ' : '📦 '} {product.stock} units available in stock
+                            </p>
                         )}
                         {product.stock === 0 && (
                             <p className="text-sm text-red-400">Out of stock</p>
