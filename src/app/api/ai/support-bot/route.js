@@ -42,7 +42,7 @@ export async function POST(request) {
             );
         }
 
-        
+
         const { message, imageBase64, imageMimeType, sessionHistory } = body;
 
         if (!message || message.length > 500) {
@@ -114,7 +114,7 @@ Rules:
 - If no matching products found, acknowledge and suggest browsing the shop`;
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         // Build chat history (last 6 exchanges max)
         const formattedHistory = [];

@@ -20,11 +20,16 @@ export default function ArtisanDashboard() {
                     fetch('/api/products?artisan=me&limit=50'),
                     fetch('/api/orders'),
                 ]);
-                const productsData = await productsRes.json();
-                const ordersData = await ordersRes.json();
 
-                if (productsData.success) setProducts(productsData.data.products);
-                if (ordersData.success) setOrders(ordersData.data.orders);
+                if (productsRes.ok) {
+                    const productsData = await productsRes.json();
+                    if (productsData.success) setProducts(productsData.data.products);
+                }
+
+                if (ordersRes.ok) {
+                    const ordersData = await ordersRes.json();
+                    if (ordersData.success) setOrders(ordersData.data.orders);
+                }
             } catch (err) {
                 console.error('Failed to load dashboard data:', err);
             } finally {

@@ -26,7 +26,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can use image analysis' }, { status: 403 });
         }
 
-        
+
         const { imageUrl } = body;
 
         if (!imageUrl || !imageUrl.startsWith('https://res.cloudinary.com')) {
@@ -48,7 +48,7 @@ export async function POST(request) {
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({
-            model: process.env.GEMINI_VISION_MODEL || 'gemini-1.5-flash',
+            model: process.env.GEMINI_VISION_MODEL || 'gemini-2.5-flash',
         });
 
         const visionPrompt = `You are an expert in Indian traditional handicrafts with 30 years of experience identifying craft types, materials, and regional origins from photographs.
