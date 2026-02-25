@@ -155,12 +155,12 @@ export function SmoothCursor({
             });
         };
 
-        // document.body.style.cursor = 'none'; // Re-enable if you want full hide
+        document.body.style.cursor = 'none'; // Re-enable if you want full hide
         window.addEventListener('mousemove', throttledMouseMove);
 
         return () => {
             window.removeEventListener('mousemove', throttledMouseMove);
-            // document.body.style.cursor = 'auto'; // Re-enable if you want full hide
+            document.body.style.cursor = 'auto'; // Re-enable if you want full hide
             if (rafId) cancelAnimationFrame(rafId);
         };
     }, [cursorX, cursorY, rotation, scale]);
