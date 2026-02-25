@@ -960,7 +960,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
     };
 
     return (
-        <div className="relative w-full h-[600px] overflow-hidden rounded-2xl bg-black/5 border border-white/5">
+        <div className="relative w-full h-full bg-[#050505] overflow-hidden">
             <canvas
                 id="infinite-grid-menu-canvas"
                 ref={canvasRef}

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import InfiniteMenu from '@/components/animations/InfiniteMenu';
+import ProductImageGallery from '@/components/shop/ProductImageGallery';
 import { useCart } from '@/contexts/CartContext';
 import FAQAccordion from '@/components/shop/FAQAccordion';
 import toast from 'react-hot-toast';
@@ -133,10 +134,35 @@ export default function ProductDetailPage({ params }) {
     const isOwner = user?.role === 'artisan' && user?.artisanProfile === artisanId;
 
     return (
-        <main className="min-h-screen bg-[#050505] pt-24">
+        <main className="min-h-screen bg-[#050505]">
             <Navbar />
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            {/* Full Screen Infinite Menu Hero */}
+            <div className="w-full h-[100svh] relative pt-[72px]">
+                <InfiniteMenu
+                    items={product.images.map(img => ({
+                        image: img.url,
+                        title: product.title,
+                        description: product.category?.replace('_', ' ')
+                    }))}
+                    scale={1.2}
+                />
+
+                {/* Scroll Indicator */}
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 animate-bounce">
+                    <button
+                        onClick={() => window.scrollBy({ top: window.innerHeight - 80, behavior: 'smooth' })}
+                        className="w-12 h-12 rounded-full border border-white/20 bg-black/60 backdrop-blur-md flex items-center justify-center text-white/90 hover:text-white hover:bg-[#C4622D] shadow-2xl hover:scale-110 transition-all"
+                    >
+                        ↓
+                    </button>
+                </div>
+
+                {/* Fade to black gradient transition */}
+                <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none" />
+            </div>
+
+            <div className="max-w-7xl mx-auto px-6 py-16" id="details">
                 {/* Breadcrumb */}
                 <div className="flex items-center gap-2 text-xs text-white/30 mb-8">
                     <Link href="/shop" className="hover:text-white/60 transition-colors">Shop</Link>
@@ -173,15 +199,8 @@ export default function ProductDetailPage({ params }) {
                         </div>
 
                         {activeTab === 'photos' ? (
-                            <div style={{ height: '600px', position: 'relative' }}>
-                                <InfiniteMenu
-                                    items={product.images.map(img => ({
-                                        image: img.url,
-                                        title: product.title,
-                                        description: product.category?.replace('_', ' ')
-                                    }))}
-                                    scale={1}
-                                />
+                            <div className="sticky top-32">
+                                <ProductImageGallery images={product.images} />
                             </div>
                         ) : (
                             <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px]">
