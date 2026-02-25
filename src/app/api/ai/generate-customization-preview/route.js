@@ -29,7 +29,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can generate previews' }, { status: 403 });
         }
 
-        
+
         const { chatId, productImageUrl, customizationPrompt, referenceImageUrl } = body;
 
         if (!chatId || !productImageUrl || !customizationPrompt) {
@@ -55,7 +55,8 @@ export async function POST(request) {
         }
 
         // Fetch product image as base64
-        const productImgRes = await fetch(productImageUrl);
+        const resolvedProductUrl = productImageUrl?.url || (typeof productImageUrl === 'string' ? productImageUrl : '');
+        const productImgRes = await fetch(resolvedProductUrl);
         const productBuffer = await productImgRes.arrayBuffer();
         const productBase64 = Buffer.from(productBuffer).toString('base64');
 
