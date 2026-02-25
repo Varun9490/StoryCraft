@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
+import { Lens } from '@/components/animations/Lens';
 
 export default function ProductCard({ product, index = 0 }) {
     const { dispatch } = useCart();
@@ -48,36 +49,37 @@ export default function ProductCard({ product, index = 0 }) {
             <Link href={`/shop/${product._id}`} className="block">
                 {/* Image */}
                 <div className="relative aspect-[4/5] overflow-hidden bg-[#1A1209]">
-                    {imageUrl ? (
-                        <Image
-                            src={imageUrl}
-                            alt={product.title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                    ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-white/10 text-6xl">
-                            🎨
-                        </div>
-                    )}
-
-                    {/* City badge */}
-                    <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs bg-black/60 border border-white/20 text-white/70 backdrop-blur-sm">
-                        {product.city || 'Vizag'}
-                    </span>
-
-                    {/* Stock warning */}
-                    {product.stock <= 3 && product.stock > 0 && (
-                        <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs bg-amber-500/20 border border-amber-500/40 text-amber-300">
-                            Only {product.stock} left
+                    <Lens zoomFactor={1.5} lensSize={150}>
+                        {imageUrl ? (
+                            <Image
+                                src={imageUrl}
+                                alt={product.title}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-white/10 text-6xl">
+                                🎨
+                            </div>
+                        )}
+                        {/* City badge */}
+                        <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs bg-black/60 border border-white/20 text-white/70 backdrop-blur-sm z-10">
+                            {product.city || 'Vizag'}
                         </span>
-                    )}
-                    {product.stock === 0 && (
-                        <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs bg-red-500/20 border border-red-500/40 text-red-300">
-                            Out of Stock
-                        </span>
-                    )}
+
+                        {/* Stock warning */}
+                        {product.stock <= 3 && product.stock > 0 && (
+                            <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs bg-amber-500/20 border border-amber-500/40 text-amber-300 z-10">
+                                Only {product.stock} left
+                            </span>
+                        )}
+                        {product.stock === 0 && (
+                            <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs bg-red-500/20 border border-red-500/40 text-red-300 z-10">
+                                Out of Stock
+                            </span>
+                        )}
+                    </Lens>
                 </div>
 
                 {/* Info */}
@@ -107,10 +109,10 @@ export default function ProductCard({ product, index = 0 }) {
                             onClick={handleAddToCart}
                             disabled={product.stock === 0}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${added
-                                    ? 'bg-green-500/20 border border-green-500/40 text-green-300'
-                                    : product.stock === 0
-                                        ? 'bg-white/5 border border-white/10 text-white/20 cursor-not-allowed'
-                                        : 'bg-white/10 border border-white/20 text-white/70 hover:bg-[#C4622D] hover:border-[#C4622D] hover:text-white'
+                                ? 'bg-green-500/20 border border-green-500/40 text-green-300'
+                                : product.stock === 0
+                                    ? 'bg-white/5 border border-white/10 text-white/20 cursor-not-allowed'
+                                    : 'bg-white/10 border border-white/20 text-white/70 hover:bg-[#C4622D] hover:border-[#C4622D] hover:text-white'
                                 }`}
                         >
                             {added ? '✓ Added' : product.stock === 0 ? 'Sold Out' : 'Add to Cart'}
