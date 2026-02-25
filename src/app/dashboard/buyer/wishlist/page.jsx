@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -49,8 +48,7 @@ export default function WishlistPage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#06060A] pt-24 pb-16">
-            <Navbar />
+        <main className="min-h-screen bg-[#06060A] pt-8 pb-16">
             <div className="max-w-6xl mx-auto px-6">
                 <div className="mb-8">
                     <h1
