@@ -4,12 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
-const navItems = [
-    { label: "Story", href: "#story" },
-    { label: "Artisans", href: "#artisans" },
-    { label: "Shop", href: "#shop" },
+const publicNavItems = [
+    { label: "Story", href: "/#story" },
+    { label: "Artisans", href: "/#artisans" },
+    { label: "Shop", href: "/shop" },
     { label: "Chat", href: "/chat" },
-    { label: "AI Features", href: "#ai-features" },
+    { label: "AI Features", href: "/#ai-features" },
 ];
 
 export default function Navbar() {
@@ -18,6 +18,13 @@ export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const { scrollY } = useScroll();
     const { user, loading, logout } = useAuth();
+
+    const navItems = user
+        ? [
+            ...(user.role === 'buyer' ? [{ label: "Wishlist", href: "/dashboard/buyer/wishlist" }] : []),
+            { label: "Chat", href: "/chat" },
+        ]
+        : publicNavItems;
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50);
