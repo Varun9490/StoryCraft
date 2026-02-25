@@ -338,7 +338,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-[#8B5CF6]">Beta</span>
                                 </div>
                                 <ImageAnalysisTrigger
-                                    imageUrl={form.images[0]}
+                                    imageUrl={form.images[0]?.url || (typeof form.images[0] === 'string' ? form.images[0] : '')}
                                     onAnalysisComplete={(analysis) => {
                                         if (analysis.suggested_title) updateField('title', analysis.suggested_title);
                                         if (analysis.suggested_description) updateField('description', analysis.suggested_description);
