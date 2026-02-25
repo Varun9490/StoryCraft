@@ -4,6 +4,8 @@ import { useEffect, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { useAuth } from '@/hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const STATUS_STEPS = [
     { key: 'pending', label: 'Order Placed', icon: '📋' },
@@ -15,15 +17,24 @@ const STATUS_STEPS = [
 
 export default function OrderConfirmationPage({ params }) {
     const { orderId } = use(params);
+    const { user } = useAuth();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
+
+    const [updateStatus, setUpdateStatus] = useState('');
+    const [updateMessage, setUpdateMessage] = useState('');
 
     useEffect(() => {
         const fetchOrder = async () => {
             try {
                 const res = await fetch(`/api/orders/${orderId}`);
                 const data = await res.json();
-                if (data.success) setOrder(data.data.order);
+                if (data.success) {
+                    setOrder(data.data.order);
+                    setUpdateStatus(data.data.order.status);
+                    setUpdateMessage(data.data.order.storytelling_status);
+                }
             } catch { }
             setLoading(false);
         };
@@ -55,6 +66,30 @@ export default function OrderConfirmationPage({ params }) {
     }
 
     const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
+
+    const isSeller = user?.role === 'artisan' && user?.artisanProfile?._id === order.artisan;
+
+    const handleUpdateOrder = async () => {
+        setUpdating(true);
+        try {
+            const res = await fetch(`/api/orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: updateStatus, storytelling_status: updateMessage })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setOrder(data.data.order);
+                toast.success('Order status updated!');
+            } else {
+                toast.error(data.error);
+            }
+        } catch (e) {
+            toast.error('Failed to update');
+        } finally {
+            setUpdating(false);
+        }
+    };
 
     return (
         <main className="min-h-screen bg-[#050505] pt-24">
@@ -93,8 +128,8 @@ export default function OrderConfirmationPage({ params }) {
                             <div className="flex flex-col items-center gap-1">
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-colors ${i <= currentStepIndex
-                                            ? 'bg-[#C4622D] text-white'
-                                            : 'bg-white/5 text-white/20'
+                                        ? 'bg-[#C4622D] text-white'
+                                        : 'bg-white/5 text-white/20'
                                         }`}
                                 >
                                     {s.icon}
@@ -142,8 +177,8 @@ export default function OrderConfirmationPage({ params }) {
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-white/40">Payment</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.payment_status === 'paid'
-                                ? 'bg-green-500/15 text-green-400 border border-green-500/30'
-                                : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
+                            ? 'bg-green-500/15 text-green-400 border border-green-500/30'
+                            : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
                             }`}>
                             {order.payment_status}
                         </span>
@@ -157,6 +192,43 @@ export default function OrderConfirmationPage({ params }) {
                         </div>
                     )}
                 </div>
+
+                {isSeller && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-4 mt-6">
+                        <h3 className="text-sm font-semibold text-[#8B5CF6] uppercase tracking-wider flex items-center gap-2">
+                            <span>✦</span> Seller Controls
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">Update Status</label>
+                                <select
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/90 focus:border-[#C4622D] focus:outline-none transition-colors"
+                                    value={updateStatus}
+                                    onChange={(e) => setUpdateStatus(e.target.value)}
+                                >
+                                    {STATUS_STEPS.map(s => <option key={s.key} value={s.key} className="bg-[#1A1209] text-white">{s.label}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">Storytelling Message</label>
+                                <textarea
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/90 focus:border-[#C4622D] focus:outline-none transition-colors resize-none"
+                                    value={updateMessage}
+                                    onChange={(e) => setUpdateMessage(e.target.value)}
+                                    rows={2}
+                                />
+                            </div>
+                            <button
+                                onClick={handleUpdateOrder}
+                                disabled={updating}
+                                className="w-full py-3 mt-2 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-50"
+                                style={{ background: '#8B5CF6' }}
+                            >
+                                {updating ? 'Saving...' : 'Update Order'}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex gap-3 mt-8">
