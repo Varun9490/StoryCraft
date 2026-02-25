@@ -969,50 +969,6 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
 
             {activeItem && (
                 <>
-                    <h2
-                        className={`
-          select-none
-          absolute
-          font-serif
-          text-3xl sm:text-4xl md:text-5xl lg:text-6xl
-          text-white
-          left-12
-          top-1/2
-          transform
-          translate-x-4
-          -translate-y-1/2
-          transition-all
-          drop-shadow-2xl
-          z-10
-          ${isMoving
-                                ? 'opacity-0 pointer-events-none duration-[100ms]'
-                                : 'opacity-100 pointer-events-auto duration-[500ms]'
-                            }
-        `}
-                        style={{ fontFamily: 'var(--font-playfair)' }}
-                    >
-                        {activeItem.title}
-                    </h2>
-
-                    <p
-                        className={`
-          select-none
-          absolute
-          max-w-[200px] sm:max-w-xs
-          text-sm sm:text-base text-white/70
-          top-1/2
-          right-12
-          transition-all
-          z-10
-          ${isMoving
-                                ? 'opacity-0 pointer-events-none duration-[100ms] translate-x-12 -translate-y-1/2'
-                                : 'opacity-100 pointer-events-auto duration-[500ms] translate-x-0 -translate-y-1/2'
-                            }
-        `}
-                    >
-                        {activeItem.description}
-                    </p>
-
                     <div
                         onClick={handleButtonClick}
                         className={`
