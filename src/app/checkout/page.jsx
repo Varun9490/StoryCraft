@@ -15,6 +15,7 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(false);
     const [orderId, setOrderId] = useState(null);
     const [step, setStep] = useState('address'); // 'address' | 'payment'
+    const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' | 'cod'
 
     const [address, setAddress] = useState({
         street: '',
@@ -43,6 +44,7 @@ export default function CheckoutPage() {
                         quantity: i.quantity,
                     })),
                     delivery_address: address,
+                    payment_method: paymentMethod,
                 }),
             });
 
@@ -50,8 +52,15 @@ export default function CheckoutPage() {
             if (!data.success) throw new Error(data.error);
 
             setOrderId(data.data.order._id);
-            setStep('payment');
-            toast.success('Order created! Proceed to payment.');
+
+            if (paymentMethod === 'cod') {
+                dispatch({ type: 'CLEAR_CART' });
+                toast.success('Order placed successfully (COD)!');
+                router.push(`/orders/${data.data.order._id}`);
+            } else {
+                setStep('payment');
+                toast.success('Address saved! Proceed to payment.');
+            }
         } catch (err) {
             toast.error(err.message || 'Failed to create order');
         } finally {
@@ -92,10 +101,10 @@ export default function CheckoutPage() {
                         <div key={label} className="flex items-center gap-3">
                             <div
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${(step === 'address' && i === 0) || (step === 'payment' && i === 1)
-                                        ? 'bg-[#C4622D] text-white font-semibold'
-                                        : i === 0 && step === 'payment'
-                                            ? 'bg-green-500/20 text-green-400 font-medium'
-                                            : 'bg-white/5 text-white/25'
+                                    ? 'bg-[#C4622D] text-white font-semibold'
+                                    : i === 0 && step === 'payment'
+                                        ? 'bg-green-500/20 text-green-400 font-medium'
+                                        : 'bg-white/5 text-white/25'
                                     }`}
                             >
                                 {i === 0 && step === 'payment' ? '✓' : i + 1}. {label}
@@ -180,13 +189,35 @@ export default function CheckoutPage() {
                                     </div>
                                 </div>
 
+                                <div>
+                                    <label className="block text-xs text-white/40 mb-3 uppercase tracking-wider">Payment Method *</label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPaymentMethod('online')}
+                                            className={`p-4 rounded-xl border text-left transition-all ${paymentMethod === 'online' ? 'border-[#C4622D] bg-[#C4622D]/10' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
+                                        >
+                                            <div className="font-semibold text-sm mb-1 text-white/90">💳 Pay Online</div>
+                                            <div className="text-xs text-white/40">Razorpay Secured</div>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPaymentMethod('cod')}
+                                            className={`p-4 rounded-xl border text-left transition-all ${paymentMethod === 'cod' ? 'border-[#C4622D] bg-[#C4622D]/10' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
+                                        >
+                                            <div className="font-semibold text-sm mb-1 text-white/90">🚚 Cash on Delivery</div>
+                                            <div className="text-xs text-white/40">Pay upon arrival</div>
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <button
                                     type="submit"
                                     disabled={loading}
                                     className="w-full py-3 mt-4 rounded-xl font-semibold text-white transition-all hover:brightness-110 disabled:opacity-30"
                                     style={{ background: '#C4622D', boxShadow: '0 4px 16px rgba(196,98,45,0.3)' }}
                                 >
-                                    {loading ? 'Creating Order...' : 'Continue to Payment →'}
+                                    {loading ? 'Processing...' : paymentMethod === 'cod' ? 'Place Order (COD) →' : 'Continue to Payment →'}
                                 </button>
                             </motion.form>
                         )}

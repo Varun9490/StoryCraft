@@ -78,8 +78,8 @@ export async function POST(request) {
             );
         }
 
-        
-        const { items, delivery_address, razorpay_payment_id, razorpay_order_id } = body;
+
+        const { items, delivery_address, razorpay_payment_id, razorpay_order_id, payment_method } = body;
 
         if (!items || items.length === 0) {
             return NextResponse.json(
@@ -131,12 +131,13 @@ export async function POST(request) {
             artisan: firstArtisan,
             items: formattedItems,
             total_amount: totalAmount,
-            status: 'pending',
+            status: payment_method === 'cod' ? 'confirmed' : 'pending',
             payment_status: 'unpaid',
             delivery_address,
             storytelling_status: 'Your story has begun — order placed!',
             payment_id: razorpay_payment_id || '',
             razorpay_order_id: razorpay_order_id || '',
+            payment_method: payment_method || 'online',
         });
 
         await order.save();
