@@ -5,7 +5,6 @@ import Order from '@/models/Order';
 import { verifyJWT } from '@/lib/auth';
 import { apiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
-import { sendOrderConfirmationEmail } from '@/lib/sendgrid';
 
 export async function POST(request) {
     try {
@@ -63,14 +62,6 @@ export async function POST(request) {
         order.razorpay_order_id = razorpay_order_id;
         order.storytelling_status = 'Your payment is received. The artisan is weaving your story...';
         await order.save();
-
-        if (order.delivery_address?.email) {
-            await sendOrderConfirmationEmail({
-                to: order.delivery_address.email,
-                orderDetails: order,
-                isCOD: false,
-            });
-        }
 
         return NextResponse.json({
             success: true,
