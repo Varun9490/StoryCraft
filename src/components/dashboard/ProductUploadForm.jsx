@@ -98,9 +98,9 @@ export default function ProductUploadForm({ existingProduct = null }) {
 
     const canProceedStep0 = form.title && form.category && form.description;
     const canProceedStep1 = form.images.length >= 1;
-    const canSubmit = form.price > 0;
+    const canSubmit = form.price > 0 && form.images.length > 0;
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (isPublishing = false) => {
         setLoading(true);
         try {
             const url = isEdit ? `/api/products/${existingProduct._id}` : '/api/products';
@@ -117,6 +117,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
                         min: form.suggested_price_range.min ? Number(form.suggested_price_range.min) : undefined,
                         max: form.suggested_price_range.max ? Number(form.suggested_price_range.max) : undefined,
                     },
+                    is_published: isPublishing,
                     ai_generated_faqs: form.ai_generated_faqs,
                 }),
             });
@@ -438,12 +439,19 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                 ← Back
                             </button>
                             <button
-                                onClick={handleSubmit}
+                                onClick={() => handleSubmit(false)}
                                 disabled={!canSubmit || loading}
-                                className="flex-1 py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110"
+                                className="flex-1 py-3 rounded-xl font-semibold text-white/80 transition-all disabled:opacity-30 border border-white/20 hover:bg-white/5"
+                            >
+                                {loading ? 'Saving...' : 'Save as Draft'}
+                            </button>
+                            <button
+                                onClick={() => handleSubmit(true)}
+                                disabled={!canSubmit || loading}
+                                className="flex-1 py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-30 hover:brightness-110"
                                 style={{ background: canSubmit ? '#C4622D' : '#333', boxShadow: canSubmit ? '0 4px 16px rgba(196,98,45,0.3)' : 'none' }}
                             >
-                                {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Save as Draft'}
+                                {loading ? 'Saving...' : isEdit ? 'Update & Publish' : 'Publish Product'}
                             </button>
                         </div>
                     </motion.div>

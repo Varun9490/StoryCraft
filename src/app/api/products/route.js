@@ -150,6 +150,7 @@ export async function POST(request) {
             title, description, category, price, images,
             city, stock, is_customizable, tags,
             material, craft_technique, suggested_price_range,
+            is_published,
         } = body;
 
         // Validate required fields
@@ -185,7 +186,7 @@ export async function POST(request) {
             city: city || 'Visakhapatnam',
             stock: stock || 1,
             is_customizable: is_customizable || false,
-            is_published: false,
+            is_published: is_published || false,
             tags: tags || [],
             material: material || '',
             craft_technique: craft_technique || '',

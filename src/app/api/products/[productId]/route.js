@@ -108,11 +108,12 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ success: false, error: 'You can only edit your own products' }, { status: 403 });
         }
 
-        
+
         const allowedFields = [
             'title', 'description', 'category', 'price', 'images',
             'city', 'stock', 'is_customizable', 'tags',
             'material', 'craft_technique', 'suggested_price_range',
+            'is_published',
         ];
 
         const updates = {};
