@@ -6,7 +6,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import InfiniteMenu from '@/components/animations/InfiniteMenu';
-import ProductImageGallery from '@/components/shop/ProductImageGallery';
 import { useCart } from '@/contexts/CartContext';
 import FAQAccordion from '@/components/shop/FAQAccordion';
 import toast from 'react-hot-toast';
@@ -172,60 +171,9 @@ export default function ProductDetailPage({ params }) {
                     <span className="text-white/60 truncate max-w-[200px]">{product.title}</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {/* Left: Images */}
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                        <div className="flex items-center gap-4 mb-6">
-                            <button
-                                onClick={() => setActiveTab('photos')}
-                                className={`relative px-2 py-1 text-sm font-medium transition-colors ${activeTab === 'photos' ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
-                            >
-                                Photos
-                                {activeTab === 'photos' && (
-                                    <motion.div layoutId="tab-indicator" className="absolute bottom-[-4px] left-0 w-full h-[2px] bg-[#C4622D]" />
-                                )}
-                            </button>
-                            {(product.model_3d_url || isOwner) && (
-                                <button
-                                    onClick={() => setActiveTab('3d')}
-                                    className={`relative px-2 py-1 text-sm font-medium transition-colors ${activeTab === '3d' ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
-                                >
-                                    3D View
-                                    {activeTab === '3d' && (
-                                        <motion.div layoutId="tab-indicator" className="absolute bottom-[-4px] left-0 w-full h-[2px] bg-[#C4622D]" />
-                                    )}
-                                </button>
-                            )}
-                        </div>
-
-                        {activeTab === 'photos' ? (
-                            <div className="sticky top-32">
-                                <ProductImageGallery images={product.images} />
-                            </div>
-                        ) : (
-                            <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px]">
-                                {product.model_3d_url && product.model_3d_status === 'ready' ? (
-                                    <ProductModelViewer modelUrl={product.model_3d_url} productTitle={product.title} />
-                                ) : isOwner ? (
-                                    <div className="text-center space-y-4">
-                                        <p className="text-white/50 text-sm">Showcase your product in immersive 3D using Meshy AI.</p>
-                                        <button
-                                            onClick={handleGenerate3D}
-                                            disabled={isGenerating3D}
-                                            className="px-6 py-2 bg-[#8B5CF6] text-white text-sm font-medium rounded-lg hover:brightness-110 disabled:opacity-50 transition-all"
-                                        >
-                                            {isGenerating3D ? 'Generating (Takes a minute)...' : 'Generate 3D Model ✨'}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <p className="text-white/50">3D model not available yet.</p>
-                                )}
-                            </div>
-                        )}
-                    </motion.div>
-
-                    {/* Right: Info */}
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                <div className="max-w-3xl mx-auto flex flex-col gap-12">
+                    {/* Info */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                         {/* Category & City */}
                         <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-white/50 uppercase tracking-wider">
@@ -373,6 +321,28 @@ export default function ProductDetailPage({ params }) {
 
                         {/* FAQ Accordion */}
                         <FAQAccordion faqs={faqs} productTitle={product.title} />
+
+                        {/* 3D Model Viewer Optional Block */}
+                        {(product.model_3d_url || isOwner) && (
+                            <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px] mt-12 border border-white/5">
+                                {product.model_3d_url && product.model_3d_status === 'ready' ? (
+                                    <ProductModelViewer modelUrl={product.model_3d_url} productTitle={product.title} />
+                                ) : isOwner ? (
+                                    <div className="text-center space-y-4">
+                                        <p className="text-white/50 text-sm">Showcase your product in immersive 3D using Meshy AI.</p>
+                                        <button
+                                            onClick={handleGenerate3D}
+                                            disabled={isGenerating3D}
+                                            className="px-6 py-2 bg-[#8B5CF6] text-white text-sm font-medium rounded-lg hover:brightness-110 disabled:opacity-50 transition-all"
+                                        >
+                                            {isGenerating3D ? 'Generating (Takes a minute)...' : 'Generate 3D Model ✨'}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="text-white/50">3D model not available yet.</p>
+                                )}
+                            </div>
+                        )}
                     </motion.div>
                 </div>
             </div>
