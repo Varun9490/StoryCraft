@@ -12,8 +12,8 @@ import ImageAnalysisTrigger from '@/components/ai/ImageAnalysisTrigger';
 import { CATEGORIES } from '@/data/categories';
 
 const STEPS = [
-    { label: 'Basic Info', icon: '✏️' },
     { label: 'Images', icon: '📸' },
+    { label: 'Basic Info', icon: '✏️' },
     { label: 'Pricing', icon: '💰' },
 ];
 
@@ -96,8 +96,8 @@ export default function ProductUploadForm({ existingProduct = null }) {
 
     const removeTag = (t) => updateField('tags', form.tags.filter((tag) => tag !== t));
 
-    const canProceedStep0 = form.title && form.category && form.description;
-    const canProceedStep1 = form.images.length >= 1;
+    const canProceedStep0 = form.images.length >= 1;
+    const canProceedStep1 = form.title && form.category && form.description;
     const canSubmit = form.price > 0 && form.images.length > 0;
 
     const handleSubmit = async (isPublishing = false) => {
@@ -164,9 +164,48 @@ export default function ProductUploadForm({ existingProduct = null }) {
             </div>
 
             <AnimatePresence mode="wait">
-                {/* Step 1: Basic Info */}
+                {/* Step 1: Images */}
                 {step === 0 && (
                     <motion.div key="step0" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-5">
+                        <ImageUploadZone
+                            images={form.images}
+                            onChange={(imgs) => updateField('images', imgs)}
+                            maxImages={6}
+                        />
+
+                        {/* AI Image Analysis */}
+                        {form.images.length > 0 && (
+                            <div className="border-t border-white/10 pt-5">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-sm text-[#8B5CF6]">✦</span>
+                                    <span className="text-xs text-white/50 uppercase tracking-wider font-medium">AI Vision Analysis</span>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-[#8B5CF6]">Beta</span>
+                                </div>
+                                <ImageAnalysisTrigger
+                                    imageUrl={form.images[0]?.url || (typeof form.images[0] === 'string' ? form.images[0] : '')}
+                                    onAnalysisComplete={(analysis) => {
+                                        if (analysis.suggested_title) updateField('title', analysis.suggested_title);
+                                        if (analysis.suggested_description) updateField('description', analysis.suggested_description);
+                                        if (analysis.material) updateField('material', analysis.material);
+                                        if (analysis.suggested_tags) updateField('tags', analysis.suggested_tags);
+                                    }}
+                                />
+                            </div>
+                        )}
+                        <button
+                            onClick={() => setStep(1)}
+                            disabled={!canProceedStep0}
+                            className="w-full py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110"
+                            style={{ background: canProceedStep0 ? '#C4622D' : '#333' }}
+                        >
+                            Continue to Basic Info →
+                        </button>
+                    </motion.div>
+                )}
+
+                {/* Step 2: Basic Info */}
+                {step === 1 && (
+                    <motion.div key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-5">
                         <div>
                             <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">Product Title *</label>
                             <input
@@ -309,46 +348,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
                             )}
                         </div>
 
-                        <button
-                            onClick={() => setStep(1)}
-                            disabled={!canProceedStep0}
-                            className="w-full py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110"
-                            style={{ background: canProceedStep0 ? '#C4622D' : '#333' }}
-                        >
-                            Continue to Images →
-                        </button>
-                    </motion.div>
-                )}
-
-                {/* Step 2: Images */}
-                {step === 1 && (
-                    <motion.div key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-5">
-                        <ImageUploadZone
-                            images={form.images}
-                            onChange={(imgs) => updateField('images', imgs)}
-                            maxImages={6}
-                        />
-
-                        {/* AI Image Analysis */}
-                        {form.images.length > 0 && (
-                            <div className="border-t border-white/10 pt-5">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-sm text-[#8B5CF6]">✦</span>
-                                    <span className="text-xs text-white/50 uppercase tracking-wider font-medium">AI Vision Analysis</span>
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-[#8B5CF6]">Beta</span>
-                                </div>
-                                <ImageAnalysisTrigger
-                                    imageUrl={form.images[0]?.url || (typeof form.images[0] === 'string' ? form.images[0] : '')}
-                                    onAnalysisComplete={(analysis) => {
-                                        if (analysis.suggested_title) updateField('title', analysis.suggested_title);
-                                        if (analysis.suggested_description) updateField('description', analysis.suggested_description);
-                                        if (analysis.material) updateField('material', analysis.material);
-                                        if (analysis.suggested_tags) updateField('tags', analysis.suggested_tags);
-                                    }}
-                                />
-                            </div>
-                        )}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 pt-4">
                             <button onClick={() => setStep(0)} className="flex-1 py-3 rounded-xl font-semibold border border-white/10 text-white/60 hover:bg-white/5 transition-colors">
                                 ← Back
                             </button>
