@@ -31,7 +31,7 @@ export function Lens({
     return (
         <div
             ref={containerRef}
-            className="relative overflow-hidden rounded-2xl w-full h-full cursor-crosshair group"
+            className="relative overflow-hidden rounded-2xl w-full h-full cursor-none group"
             onMouseEnter={() => updateHovering(true)}
             onMouseLeave={() => updateHovering(false)}
             onMouseMove={handleMouseMove}
