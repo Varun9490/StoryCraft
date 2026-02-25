@@ -28,7 +28,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can generate FAQs' }, { status: 403 });
         }
 
-        
+
         const { title, description, category, material, craft_technique, city, productId } = body;
 
         // Validate
@@ -93,13 +93,21 @@ Generate exactly 8 items.`;
 
         try {
             const rawText = await generateWithRetry(model, prompt);
-            parsedFaqs = parseAIJson(rawText);
+            let resultFaqs = parseAIJson(rawText);
+            if (resultFaqs && !Array.isArray(resultFaqs) && Array.isArray(resultFaqs.faqs)) {
+                resultFaqs = resultFaqs.faqs;
+            }
+            parsedFaqs = resultFaqs;
         } catch (firstError) {
             // Retry with stricter prompt
             try {
                 const strictPrompt = prompt + '\n\nCRITICAL: Return ONLY raw JSON. No markdown formatting. No ```json blocks. Just the array.';
                 const rawText = await generateWithRetry(model, strictPrompt);
-                parsedFaqs = parseAIJson(rawText);
+                let resultFaqs = parseAIJson(rawText);
+                if (resultFaqs && !Array.isArray(resultFaqs) && Array.isArray(resultFaqs.faqs)) {
+                    resultFaqs = resultFaqs.faqs;
+                }
+                parsedFaqs = resultFaqs;
             } catch (secondError) {
                 console.error('FAQ generation failed twice:', secondError);
                 return NextResponse.json(
