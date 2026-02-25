@@ -11,7 +11,7 @@ function getGenAI() {
 
 export function getFlashModel() {
     return getGenAI().getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         generationConfig: {
             temperature: 0.4,
             topK: 32,
