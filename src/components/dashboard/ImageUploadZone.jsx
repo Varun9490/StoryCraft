@@ -19,6 +19,8 @@ export default function ImageUploadZone({ images = [], onChange, maxImages = 6 }
                 return;
             }
 
+            let currentImages = [...images];
+
             for (const file of fileArray) {
                 if (!file.type.startsWith('image/')) {
                     toast.error(`${file.name} is not an image`);
@@ -62,7 +64,8 @@ export default function ImageUploadZone({ images = [], onChange, maxImages = 6 }
                         return next;
                     });
 
-                    onChange([...images, { url: data.data.url, public_id: data.data.public_id }]);
+                    currentImages = [...currentImages, { url: data.data.url, public_id: data.data.public_id }];
+                    onChange(currentImages);
                 } catch (err) {
                     setUploading((prev) => {
                         const next = { ...prev };
