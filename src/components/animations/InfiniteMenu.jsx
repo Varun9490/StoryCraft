@@ -960,17 +960,17 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
     };
 
     return (
-    <div className="relative w-full h-[600px] overflow-hidden rounded-2xl bg-black/5 border border-white/5">
-      <canvas
-        id="infinite-grid-menu-canvas"
-        ref={canvasRef}
-        className="cursor-grab w-full h-full relative outline-none active:cursor-grabbing hover:opacity-100 opacity-90 transition-opacity"
-      />
+        <div className="relative w-full h-[600px] overflow-hidden rounded-2xl bg-black/5 border border-white/5">
+            <canvas
+                id="infinite-grid-menu-canvas"
+                ref={canvasRef}
+                className="cursor-grab w-full h-full relative outline-none active:cursor-grabbing hover:opacity-100 opacity-90 transition-opacity"
+            />
 
-      {activeItem && (
-        <>
-          <h2
-            className={\`
+            {activeItem && (
+                <>
+                    <h2
+                        className={`
           select-none
           absolute
           font-serif
@@ -984,19 +984,18 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
           transition-all
           drop-shadow-2xl
           z-10
-          \${
-            isMoving
-              ? 'opacity-0 pointer-events-none duration-[100ms]'
-              : 'opacity-100 pointer-events-auto duration-[500ms]'
-          }
-        \`}
-        style={{ fontFamily: 'var(--font-playfair)' }}
-        >
-            {activeItem.title}
-          </h2>
+          ${isMoving
+                                ? 'opacity-0 pointer-events-none duration-[100ms]'
+                                : 'opacity-100 pointer-events-auto duration-[500ms]'
+                            }
+        `}
+                        style={{ fontFamily: 'var(--font-playfair)' }}
+                    >
+                        {activeItem.title}
+                    </h2>
 
-          <p
-            className={\`
+                    <p
+                        className={`
           select-none
           absolute
           max-w-[200px] sm:max-w-xs
@@ -1005,19 +1004,18 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
           right-12
           transition-all
           z-10
-          \${
-            isMoving
-              ? 'opacity-0 pointer-events-none duration-[100ms] translate-x-12 -translate-y-1/2'
-              : 'opacity-100 pointer-events-auto duration-[500ms] translate-x-0 -translate-y-1/2'
-          }
-        \`}
-          >
-            {activeItem.description}
-          </p>
+          ${isMoving
+                                ? 'opacity-0 pointer-events-none duration-[100ms] translate-x-12 -translate-y-1/2'
+                                : 'opacity-100 pointer-events-auto duration-[500ms] translate-x-0 -translate-y-1/2'
+                            }
+        `}
+                    >
+                        {activeItem.description}
+                    </p>
 
-          <div
-            onClick={handleButtonClick}
-            className={\`
+                    <div
+                        onClick={handleButtonClick}
+                        className={`
           absolute
           left-1/2
           z-20
@@ -1028,20 +1026,19 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
           rounded-full
           cursor-pointer shadow-2xl
           transition-all
-          \${
-            isMoving
-              ? 'bottom-[-100px] opacity-0 pointer-events-none duration-[100ms] scale-0 -translate-x-1/2'
-              : 'bottom-12 opacity-100 pointer-events-auto duration-[500ms] scale-100 -translate-x-1/2'
-          }
-        \`}
-          >
-            <span className="text-white text-xl translate-x-0.5 -translate-y-0.5">↗</span>
-          </div>
-        </>
-      )}
-      
-      {/* Gradients */}
-      <div className="pointer-events-none absolute inset-0 bg-radial-gradient from-black/20 to-black/80" />
-    </div>
-  );
+          ${isMoving
+                                ? 'bottom-[-100px] opacity-0 pointer-events-none duration-[100ms] scale-0 -translate-x-1/2'
+                                : 'bottom-12 opacity-100 pointer-events-auto duration-[500ms] scale-100 -translate-x-1/2'
+                            }
+        `}
+                    >
+                        <span className="text-white text-xl translate-x-0.5 -translate-y-0.5">↗</span>
+                    </div>
+                </>
+            )}
+
+            {/* Gradients */}
+            <div className="pointer-events-none absolute inset-0 bg-radial-gradient from-black/20 to-black/80" />
+        </div>
+    );
 }
