@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 // ── Access Token (short-lived: 15 min) ──
 export function signAccessToken(payload) {
     return jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m',
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '7d',
     });
 }
 
@@ -39,7 +39,7 @@ export function setAuthCookie(response, token) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 900, // 15 minutes
+        maxAge: 604800, // 7 days
         path: '/',
     });
 }
