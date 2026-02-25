@@ -79,6 +79,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
     }, [form, existingProduct]);
 
     const updateField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+    const updateMultipleFields = (updates) => setForm((prev) => ({ ...prev, ...updates }));
 
     const addTag = (e) => {
         if (e.key === 'Enter' && tagInput.trim()) {
@@ -184,10 +185,16 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                 <ImageAnalysisTrigger
                                     imageUrl={form.images[0]?.url || (typeof form.images[0] === 'string' ? form.images[0] : '')}
                                     onAnalysisComplete={(analysis) => {
-                                        if (analysis.suggested_title) updateField('title', analysis.suggested_title);
-                                        if (analysis.suggested_description) updateField('description', analysis.suggested_description);
-                                        if (analysis.material) updateField('material', analysis.material);
-                                        if (analysis.suggested_tags) updateField('tags', analysis.suggested_tags);
+                                        const updates = {};
+                                        if (analysis.suggested_title) updates.title = analysis.suggested_title;
+                                        if (analysis.suggested_description) updates.description = analysis.suggested_description;
+                                        if (analysis.material) updates.material = analysis.material;
+                                        if (analysis.suggested_tags) updates.tags = analysis.suggested_tags;
+                                        if (analysis.craft_type) updates.craft_technique = analysis.craft_type;
+
+                                        updateMultipleFields(updates);
+                                        toast.success('AI recommendations applied!');
+                                        setTimeout(() => setStep(1), 500); // Transition to Form
                                     }}
                                 />
                             </div>
