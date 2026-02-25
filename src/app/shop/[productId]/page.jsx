@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import ProductImageGallery from '@/components/shop/ProductImageGallery';
+import InfiniteMenu from '@/components/animations/InfiniteMenu';
 import { useCart } from '@/contexts/CartContext';
 import FAQAccordion from '@/components/shop/FAQAccordion';
 import toast from 'react-hot-toast';
@@ -173,7 +173,16 @@ export default function ProductDetailPage({ params }) {
                         </div>
 
                         {activeTab === 'photos' ? (
-                            <ProductImageGallery images={product.images} />
+                            <div style={{ height: '600px', position: 'relative' }}>
+                                <InfiniteMenu
+                                    items={product.images.map(img => ({
+                                        image: img.url,
+                                        title: product.title,
+                                        description: product.category?.replace('_', ' ')
+                                    }))}
+                                    scale={1}
+                                />
+                            </div>
                         ) : (
                             <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px]">
                                 {product.model_3d_url && product.model_3d_status === 'ready' ? (
