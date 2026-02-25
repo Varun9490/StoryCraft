@@ -89,6 +89,14 @@ export default function ImageUploadZone({ images = [], onChange, maxImages = 6 }
         onChange(images.filter((_, i) => i !== idx));
     };
 
+    const makeCover = (idx) => {
+        if (idx === 0) return;
+        const newImages = [...images];
+        const [movedImage] = newImages.splice(idx, 1);
+        newImages.unshift(movedImage);
+        onChange(newImages);
+    };
+
     return (
         <div className="space-y-4">
             {/* Drop zone */}
@@ -144,6 +152,14 @@ export default function ImageUploadZone({ images = [], onChange, maxImages = 6 }
                                 <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#C4622D] text-white">
                                     Cover
                                 </span>
+                            )}
+                            {idx !== 0 && (
+                                <button
+                                    onClick={() => makeCover(idx)}
+                                    className="absolute bottom-1 left-1 right-1 py-1 rounded bg-black/60 text-white text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    Set as Cover
+                                </button>
                             )}
                             <button
                                 onClick={() => removeImage(idx)}

@@ -58,8 +58,25 @@ export default function ProductUploadForm({ existingProduct = null }) {
                 suggested_price_range: existingProduct.suggested_price_range || { min: '', max: '' },
                 ai_generated_faqs: existingProduct.ai_generated_faqs || [],
             });
+        } else {
+            // Un-hydrated draft resuming
+            const storedDraft = localStorage.getItem('storycraft_product_draft');
+            if (storedDraft) {
+                try {
+                    setForm(JSON.parse(storedDraft));
+                } catch (e) {
+                    // Ignore parse error
+                }
+            }
         }
     }, [existingProduct]);
+
+    useEffect(() => {
+        if (!existingProduct) {
+            // Autosave local draft continuously
+            localStorage.setItem('storycraft_product_draft', JSON.stringify(form));
+        }
+    }, [form, existingProduct]);
 
     const updateField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -106,6 +123,11 @@ export default function ProductUploadForm({ existingProduct = null }) {
 
             const data = await res.json();
             if (!data.success) throw new Error(data.error);
+
+            if (!existingProduct) {
+                localStorage.removeItem('storycraft_product_draft');
+            }
+
             toast.success(data.message || 'Product saved!');
             router.push('/dashboard/artisan');
         } catch (err) {
