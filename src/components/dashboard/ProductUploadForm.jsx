@@ -107,7 +107,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
             const data = await res.json();
             if (!data.success) throw new Error(data.error);
             toast.success(data.message || 'Product saved!');
-            router.push('/dashboard/artisan/products');
+            router.push('/dashboard/artisan');
         } catch (err) {
             toast.error(err.message || 'Failed to save product');
         } finally {
