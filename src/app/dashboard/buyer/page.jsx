@@ -14,7 +14,7 @@ export default function BuyerDashboard() {
     useEffect(() => {
         const loadOrders = async () => {
             try {
-                const res = await fetch('/api/orders');
+                const res = await fetch(`/api/orders?t=${Date.now()}`, { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success) setOrders(data.data.orders);
             } catch (err) {

@@ -17,8 +17,8 @@ export default function ArtisanDashboard() {
         const loadData = async () => {
             try {
                 const [productsRes, ordersRes] = await Promise.all([
-                    fetch('/api/products?artisan=me&limit=50'),
-                    fetch('/api/orders'),
+                    fetch(`/api/products?artisan=me&limit=50&t=${Date.now()}`, { cache: 'no-store' }),
+                    fetch(`/api/orders?t=${Date.now()}`, { cache: 'no-store' }),
                 ]);
 
                 if (productsRes.ok) {
