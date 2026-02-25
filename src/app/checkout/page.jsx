@@ -18,6 +18,8 @@ export default function CheckoutPage() {
     const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' | 'cod'
 
     const [address, setAddress] = useState({
+        email: '',
+        phone: '',
         street: '',
         city: '',
         state: '',
@@ -27,7 +29,7 @@ export default function CheckoutPage() {
 
     const handleAddressSubmit = async (e) => {
         e.preventDefault();
-        if (!address.street || !address.city || !address.state || !address.pincode) {
+        if (!address.street || !address.city || !address.state || !address.pincode || !address.email || !address.phone) {
             toast.error('Please fill all required address fields');
             return;
         }
@@ -138,6 +140,31 @@ export default function CheckoutPage() {
                                         placeholder="House/Flat number, Street name..."
                                         required
                                     />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">Email Address *</label>
+                                        <input
+                                            type="email"
+                                            value={address.email}
+                                            onChange={(e) => setAddress((p) => ({ ...p, email: e.target.value }))}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 placeholder:text-white/20 focus:border-[#C4622D] focus:outline-none transition-colors"
+                                            placeholder="your@email.com"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">Mobile Number *</label>
+                                        <input
+                                            type="tel"
+                                            value={address.phone}
+                                            onChange={(e) => setAddress((p) => ({ ...p, phone: e.target.value }))}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 placeholder:text-white/20 focus:border-[#C4622D] focus:outline-none transition-colors"
+                                            placeholder="+91..."
+                                            required
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">

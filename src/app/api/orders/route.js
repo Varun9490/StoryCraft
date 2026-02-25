@@ -6,6 +6,7 @@ import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
 import { apiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
+import { sendOrderConfirmationEmail } from '@/lib/sendgrid';
 
 // GET — list orders
 export async function GET(request) {
@@ -146,6 +147,14 @@ export async function POST(request) {
         for (const item of items) {
             await Product.findByIdAndUpdate(item.productId, {
                 $inc: { stock: -item.quantity },
+            });
+        }
+
+        if (payment_method === 'cod' && delivery_address.email) {
+            await sendOrderConfirmationEmail({
+                to: delivery_address.email,
+                orderDetails: order,
+                isCOD: true,
             });
         }
 
