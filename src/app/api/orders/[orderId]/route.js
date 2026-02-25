@@ -84,6 +84,7 @@ export async function PUT(request, { params }) {
 
         if (body.status) order.status = body.status;
         if (body.storytelling_status) order.storytelling_status = body.storytelling_status;
+        if (body.payment_status) order.payment_status = body.payment_status;
 
         await order.save();
 

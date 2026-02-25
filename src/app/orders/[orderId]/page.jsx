@@ -23,6 +23,7 @@ export default function OrderConfirmationPage({ params }) {
     const [updating, setUpdating] = useState(false);
 
     const [updateStatus, setUpdateStatus] = useState('');
+    const [updatePaymentStatus, setUpdatePaymentStatus] = useState('');
     const [updateMessage, setUpdateMessage] = useState('');
 
     useEffect(() => {
@@ -33,6 +34,7 @@ export default function OrderConfirmationPage({ params }) {
                 if (data.success) {
                     setOrder(data.data.order);
                     setUpdateStatus(data.data.order.status);
+                    setUpdatePaymentStatus(data.data.order.payment_status);
                     setUpdateMessage(data.data.order.storytelling_status);
                 }
             } catch { }
@@ -75,7 +77,11 @@ export default function OrderConfirmationPage({ params }) {
             const res = await fetch(`/api/orders/${orderId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: updateStatus, storytelling_status: updateMessage })
+                body: JSON.stringify({
+                    status: updateStatus,
+                    payment_status: updatePaymentStatus,
+                    storytelling_status: updateMessage
+                })
             });
             const data = await res.json();
             if (data.success) {
@@ -207,6 +213,18 @@ export default function OrderConfirmationPage({ params }) {
                                     onChange={(e) => setUpdateStatus(e.target.value)}
                                 >
                                     {STATUS_STEPS.map(s => <option key={s.key} value={s.key} className="bg-[#1A1209] text-white">{s.label}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">Payment Status</label>
+                                <select
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/90 focus:border-[#C4622D] focus:outline-none transition-colors"
+                                    value={updatePaymentStatus}
+                                    onChange={(e) => setUpdatePaymentStatus(e.target.value)}
+                                >
+                                    <option value="pending" className="bg-[#1A1209] text-white">Pending</option>
+                                    <option value="paid" className="bg-[#1A1209] text-white">Paid</option>
+                                    <option value="failed" className="bg-[#1A1209] text-white">Failed</option>
                                 </select>
                             </div>
                             <div>
