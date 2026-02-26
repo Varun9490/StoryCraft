@@ -130,7 +130,7 @@ export default function ProductDetailPage({ params }) {
 
     const artisanName = product.artisan?.user?.name || 'Artisan';
     const artisanId = product.artisan?._id;
-    const isOwner = user?.role === 'artisan' && user?.artisanProfile === artisanId;
+    const isOwner = user?.role === 'artisan' && user?.artisanProfile === artisanId?.toString();
 
     return (
         <main className="min-h-screen bg-[#050505]">
@@ -331,7 +331,7 @@ export default function ProductDetailPage({ params }) {
                                     <ProductModelViewer modelUrl={product.model_3d_url} productTitle={product.title} />
                                 ) : isOwner ? (
                                     <div className="text-center space-y-4">
-                                        <p className="text-white/50 text-sm">Showcase your product in immersive 3D using Meshy AI.</p>
+                                        <p className="text-white/50 text-sm">Showcase your product in immersive 3D using Stability SF3D API.</p>
                                         <button
                                             onClick={handleGenerate3D}
                                             disabled={isGenerating3D}

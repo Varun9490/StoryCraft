@@ -4,7 +4,7 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { aiLimiter, apiLimiter } from '@/lib/rate-limit';
-import { checkModelExists, uploadGLBToSpaces } from '@/lib/spaces';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 import { sanitizeBody } from '@/lib/sanitize';
 
 export async function POST(request, { params }) {
@@ -49,16 +49,6 @@ export async function POST(request, { params }) {
             return NextResponse.json({ success: true, data: { url: product.model_3d_url, cached: true } });
         }
 
-        // Check DO Spaces cache
-        const cacheKey = `models/${productId}.glb`;
-        const exists = await checkModelExists(cacheKey);
-        if (exists) {
-            const cdnUrl = `${process.env.DO_SPACES_CDN_URL}/${cacheKey}`;
-            product.model_3d_url = cdnUrl;
-            product.model_3d_status = 'ready';
-            await product.save();
-            return NextResponse.json({ success: true, data: { url: cdnUrl, cached: true } });
-        }
 
         // Get first product image
         const imageUrl = product.images?.[0]?.url || product.images?.[0];
@@ -70,74 +60,53 @@ export async function POST(request, { params }) {
         product.model_3d_status = 'generating';
         await product.save();
 
-        // Step A: Submit Meshy.ai task
-        const meshyRes = await fetch('https://api.meshy.ai/openapi/v1/image-to-3d', {
+        // Step A: Download image buffer to push over FormData
+        const imageRes = await fetch(imageUrl);
+        const imageBlob = await imageRes.blob();
+
+        const formData = new FormData();
+        formData.append('image', imageBlob, 'product-image.png');
+
+        // Step B: Submit to Stability AI Fast 3D API (Synchronous ~0.5s)
+        const stabilityRes = await fetch('https://api.stability.ai/v2beta/3d/stable-fast-3d', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.MESHY_API_KEY}`,
-                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.STABILITY_API_KEY}`,
             },
-            body: JSON.stringify({
-                image_url: imageUrl,
-                enable_pbr: true,
-                ai_model: 'meshy-4',
-            }),
+            body: formData,
         });
 
-        if (meshyRes.status === 429) {
+        if (stabilityRes.status === 429) {
             product.model_3d_status = 'failed';
             await product.save();
-            return NextResponse.json({ success: false, error: '3D generation limit reached. Try again tomorrow.' }, { status: 503 });
+            return NextResponse.json({ success: false, error: '3D generation rate limit reached. Try again later.' }, { status: 503 });
         }
 
-        const meshyData = await meshyRes.json();
-        const taskId = meshyData.result;
-
-        if (!taskId) {
+        if (!stabilityRes.ok) {
+            console.error('Stability AI Generation Failed:', await stabilityRes.text());
             product.model_3d_status = 'failed';
             await product.save();
-            return NextResponse.json({ success: false, error: '3D task creation failed' }, { status: 422 });
+            return NextResponse.json({ success: false, error: '3D model generation failed. Ensure your product image is clear and centered.' }, { status: 422 });
         }
 
-        // Step B: Poll for completion (max 10 polls, 6s each)
-        let glbUrl = null;
-        for (let i = 0; i < 10; i++) {
-            await new Promise((r) => setTimeout(r, 6000));
+        const glbBuffer = Buffer.from(await stabilityRes.arrayBuffer());
 
-            const pollRes = await fetch(`https://api.meshy.ai/openapi/v1/image-to-3d/${taskId}`, {
-                headers: { 'Authorization': `Bearer ${process.env.MESHY_API_KEY}` },
-            });
-            const pollData = await pollRes.json();
+        // Step C: Upload directly to Cloudinary bypassing DO Spaces cache logic
+        const uploadResult = await uploadToCloudinary(glbBuffer, {
+            folder: 'storycraft/3d_models',
+            resource_type: 'raw',
+            public_id: `product_${productId}_3d_${Date.now()}`,
+        });
 
-            if (pollData.status === 'SUCCEEDED') {
-                glbUrl = pollData.model_urls?.glb;
-                break;
-            }
-            if (pollData.status === 'FAILED') {
-                product.model_3d_status = 'failed';
-                await product.save();
-                return NextResponse.json({ success: false, error: '3D model generation failed. The image may not be suitable.' }, { status: 422 });
-            }
-        }
-
-        if (!glbUrl) {
-            product.model_3d_status = 'failed';
-            await product.save();
-            return NextResponse.json({ success: false, error: '3D generation timed out' }, { status: 408 });
-        }
-
-        // Download GLB and upload to DO Spaces
-        const glbResponse = await fetch(glbUrl);
-        const glbBuffer = Buffer.from(await glbResponse.arrayBuffer());
-        const cdnUrl = await uploadGLBToSpaces(glbBuffer, cacheKey);
-
-        product.model_3d_url = cdnUrl;
+        product.model_3d_url = uploadResult.url;
         product.model_3d_status = 'ready';
         await product.save();
 
-        return NextResponse.json({ success: true, data: { url: cdnUrl, cached: false } });
+        return NextResponse.json({ success: true, data: { url: uploadResult.url, cached: false } });
     } catch (error) {
         console.error('3D generation error:', error);
-        return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+
+        // Rollback state visually
+        return NextResponse.json({ success: false, error: 'Internal server error while building 3D model.' }, { status: 500 });
     }
 }

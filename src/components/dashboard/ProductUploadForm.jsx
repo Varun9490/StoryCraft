@@ -448,7 +448,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                 <div className="flex-1">
                                     <h4 className="text-sm text-white/90 font-medium">Immersive 3D Generation</h4>
                                     <p className="text-xs text-white/50">
-                                        Use Meshy API to automatically convert your images into an interactive 3D model.
+                                        Use Stability SF3D API to automatically convert your images into an interactive 3D model.
                                     </p>
                                 </div>
                                 {isEdit && existingProduct?._id ? (

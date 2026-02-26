@@ -98,8 +98,8 @@ export default function GlobalChatbot() {
                                 >
                                     <div
                                         className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed relative ${msg.role === 'user'
-                                                ? 'bg-[#C4622D] text-white rounded-br-sm shadow-md'
-                                                : 'bg-white/5 text-white/90 border border-white/10 rounded-bl-sm backdrop-blur-sm'
+                                            ? 'bg-[#C4622D] text-white rounded-br-sm shadow-md'
+                                            : 'bg-white/5 text-white/90 border border-white/10 rounded-bl-sm backdrop-blur-sm'
                                             }`}
                                     >
                                         {msg.content}
@@ -159,8 +159,8 @@ export default function GlobalChatbot() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 backdrop-blur-xl border border-white/20 ${isOpen
-                        ? 'bg-white/10 text-white/80 rotate-180'
-                        : 'bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] text-white hover:border-[#C4622D]/50 group'
+                    ? 'bg-white/10 text-white/80 rotate-180'
+                    : 'bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] text-white hover:border-[#C4622D]/50 group'
                     }`}
                 style={{ zIndex: 90 }}
             >
