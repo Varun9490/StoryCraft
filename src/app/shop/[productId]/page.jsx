@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -24,6 +24,9 @@ export default function ProductDetailPage({ params }) {
     const [faqs, setFaqs] = useState([]);
     const [activeTab, setActiveTab] = useState('photos');
     const [isGenerating3D, setIsGenerating3D] = useState(false);
+    const [preview3DUrl, setPreview3DUrl] = useState(null);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [isSaving3D, setIsSaving3D] = useState(false);
     const { user } = useAuth();
 
     const handleGenerate3D = async () => {
@@ -32,9 +35,9 @@ export default function ProductDetailPage({ params }) {
             const res = await fetch(`/api/products/${productId}/generate-3d`, { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                setProduct((prev) => ({ ...prev, model_3d_url: data.data.url, model_3d_status: 'ready' }));
-                setActiveTab('3d');
-                toast.success('3D model generated successfully!');
+                setPreview3DUrl(data.data.url);
+                setShowPreviewModal(true);
+                toast.success('Preview ready for approval!');
             } else {
                 toast.error(data.error || 'Failed to generate 3D model');
             }
@@ -42,6 +45,32 @@ export default function ProductDetailPage({ params }) {
             toast.error('An error occurred');
         } finally {
             setIsGenerating3D(false);
+        }
+    };
+
+    const handleSave3D = async () => {
+        setIsSaving3D(true);
+        try {
+            const res = await fetch(`/api/products/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model_3d_url: preview3DUrl,
+                    model_3d_status: 'ready'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setProduct((prev) => ({ ...prev, model_3d_url: preview3DUrl, model_3d_status: 'ready' }));
+                setShowPreviewModal(false);
+                toast.success('3D model published to your product!');
+            } else {
+                toast.error(data.error || 'Failed to save 3D model');
+            }
+        } catch {
+            toast.error('Failed to save 3D model');
+        } finally {
+            setIsSaving3D(false);
         }
     };
 
@@ -348,6 +377,60 @@ export default function ProductDetailPage({ params }) {
                     </motion.div>
                 </div>
             </div>
+
+            {/* 3D Preview Modal */}
+            <AnimatePresence>
+                {showPreviewModal && preview3DUrl && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-[#0F0F14] border border-white/10 rounded-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+                                <h3 className="text-white/90 font-semibold flex items-center gap-2">
+                                    <span className="text-[#8B5CF6]">✦</span> 3D Model Preview
+                                </h3>
+                                <button
+                                    onClick={() => setShowPreviewModal(false)}
+                                    disabled={isSaving3D}
+                                    className="text-white/40 hover:text-white transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div className="flex-1 w-full bg-[#050505] relative min-h-[400px]">
+                                <ProductModelViewer modelUrl={preview3DUrl} productTitle={product.title} />
+                            </div>
+
+                            <div className="p-4 border-t border-white/10 bg-white/5 flex items-center justify-end gap-3 pointer-events-auto">
+                                <button
+                                    onClick={() => setShowPreviewModal(false)}
+                                    disabled={isSaving3D}
+                                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all border border-white/10 disabled:opacity-50"
+                                >
+                                    Discard
+                                </button>
+                                <button
+                                    onClick={handleSave3D}
+                                    disabled={isSaving3D}
+                                    className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-50"
+                                    style={{ background: '#8B5CF6' }}
+                                >
+                                    {isSaving3D ? 'Saving...' : 'Approve & Save Live'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </main>
     );
 }

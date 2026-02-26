@@ -113,7 +113,7 @@ export async function PUT(request, { params }) {
             'title', 'description', 'category', 'price', 'images',
             'city', 'stock', 'is_customizable', 'tags',
             'material', 'craft_technique', 'suggested_price_range',
-            'is_published',
+            'is_published', 'model_3d_url', 'model_3d_status'
         ];
 
         const updates = {};

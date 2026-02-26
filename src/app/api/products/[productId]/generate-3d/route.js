@@ -56,9 +56,7 @@ export async function POST(request, { params }) {
             return NextResponse.json({ success: false, error: 'No product image available' }, { status: 400 });
         }
 
-        // Mark as generating
-        product.model_3d_status = 'generating';
-        await product.save();
+
 
         // Step A: Download image buffer to push over FormData
         const imageRes = await fetch(imageUrl);
@@ -77,15 +75,11 @@ export async function POST(request, { params }) {
         });
 
         if (stabilityRes.status === 429) {
-            product.model_3d_status = 'failed';
-            await product.save();
             return NextResponse.json({ success: false, error: '3D generation rate limit reached. Try again later.' }, { status: 503 });
         }
 
         if (!stabilityRes.ok) {
             console.error('Stability AI Generation Failed:', await stabilityRes.text());
-            product.model_3d_status = 'failed';
-            await product.save();
             return NextResponse.json({ success: false, error: '3D model generation failed. Ensure your product image is clear and centered.' }, { status: 422 });
         }
 
@@ -98,9 +92,7 @@ export async function POST(request, { params }) {
             public_id: `product_${productId}_3d_${Date.now()}`,
         });
 
-        product.model_3d_url = uploadResult.url;
-        product.model_3d_status = 'ready';
-        await product.save();
+
 
         return NextResponse.json({ success: true, data: { url: uploadResult.url, cached: false } });
     } catch (error) {
