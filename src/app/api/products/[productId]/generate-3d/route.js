@@ -67,8 +67,8 @@ export async function POST(request, { params }) {
         const formData = new FormData();
         formData.append('image', imageBlob, 'product-image.png');
 
-        // Step B: Submit to Stability AI Fast 3D API (Synchronous ~0.5s)
-        const stabilityRes = await fetch('https://api.stability.ai/v2beta/3d/stable-fast-3d', {
+        // Step B: Submit to Stability AI Point-Aware 3D API
+        const stabilityRes = await fetch('https://api.stability.ai/v2beta/3d/stable-point-aware-3d', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${process.env.STABILITY_API_KEY}`,
