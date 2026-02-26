@@ -249,21 +249,23 @@ export default function OrderConfirmationPage({ params }) {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-3 mt-8">
-                    <Link
-                        href="/shop"
-                        className="flex-1 py-3 rounded-xl text-center text-sm font-semibold border border-white/10 text-white/60 hover:bg-white/5 transition-colors"
-                    >
-                        Continue Shopping
-                    </Link>
-                    <Link
-                        href="/dashboard/buyer"
-                        className="flex-1 py-3 rounded-xl text-center text-sm font-semibold text-white transition-all hover:brightness-110"
-                        style={{ background: '#C4622D' }}
-                    >
-                        View All Orders
-                    </Link>
-                </div>
+                {!isSeller && (
+                    <div className="flex gap-3 mt-8">
+                        <Link
+                            href="/shop"
+                            className="flex-1 py-3 rounded-xl text-center text-sm font-semibold border border-white/10 text-white/60 hover:bg-white/5 transition-colors"
+                        >
+                            Continue Shopping
+                        </Link>
+                        <Link
+                            href="/dashboard/buyer"
+                            className="flex-1 py-3 rounded-xl text-center text-sm font-semibold text-white transition-all hover:brightness-110"
+                            style={{ background: '#C4622D' }}
+                        >
+                            View All Orders
+                        </Link>
+                    </div>
+                )}
             </div>
         </main>
     );
