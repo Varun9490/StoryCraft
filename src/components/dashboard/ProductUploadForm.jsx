@@ -10,6 +10,9 @@ import FAQPreviewList from '@/components/ai/FAQPreviewList';
 import PricingRecommender from '@/components/ai/PricingRecommender';
 import ImageAnalysisTrigger from '@/components/ai/ImageAnalysisTrigger';
 import { CATEGORIES } from '@/data/categories';
+import dynamic from 'next/dynamic';
+
+const ProductModelViewer = dynamic(() => import('@/components/three/ProductModelViewer'), { ssr: false });
 
 const STEPS = [
     { label: 'Images', icon: '📸' },
@@ -22,6 +25,12 @@ export default function ProductUploadForm({ existingProduct = null }) {
     const isEdit = !!existingProduct;
     const [step, setStep] = useState(0);
     const [loading, setLoading] = useState(false);
+
+    // 3D Gen state
+    const [isGenerating3D, setIsGenerating3D] = useState(false);
+    const [preview3DUrl, setPreview3DUrl] = useState(null);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [isSaving3D, setIsSaving3D] = useState(false);
 
     const [form, setForm] = useState({
         title: '',
@@ -37,6 +46,8 @@ export default function ProductUploadForm({ existingProduct = null }) {
         stock: 1,
         suggested_price_range: { min: '', max: '' },
         ai_generated_faqs: [],
+        model_3d_url: null,
+        model_3d_status: null,
     });
 
     const [tagInput, setTagInput] = useState('');
@@ -57,6 +68,8 @@ export default function ProductUploadForm({ existingProduct = null }) {
                 stock: existingProduct.stock || 1,
                 suggested_price_range: existingProduct.suggested_price_range || { min: '', max: '' },
                 ai_generated_faqs: existingProduct.ai_generated_faqs || [],
+                model_3d_url: existingProduct.model_3d_url || null,
+                model_3d_status: existingProduct.model_3d_status || null,
             });
         } else {
             // Un-hydrated draft resuming
@@ -118,8 +131,11 @@ export default function ProductUploadForm({ existingProduct = null }) {
                         min: form.suggested_price_range.min ? Number(form.suggested_price_range.min) : undefined,
                         max: form.suggested_price_range.max ? Number(form.suggested_price_range.max) : undefined,
                     },
+                    is_customizable: form.is_customizable,
                     is_published: isPublishing,
                     ai_generated_faqs: form.ai_generated_faqs,
+                    model_3d_url: form.model_3d_url,
+                    model_3d_status: form.model_3d_status,
                 }),
             });
 
@@ -136,6 +152,54 @@ export default function ProductUploadForm({ existingProduct = null }) {
             toast.error(err.message || 'Failed to save product');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGenerate3D = async (e) => {
+        e.preventDefault();
+        if (!existingProduct?._id) return;
+        setIsGenerating3D(true);
+        try {
+            const res = await fetch(`/api/products/${existingProduct._id}/generate-3d`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                setPreview3DUrl(data.data.url);
+                setShowPreviewModal(true);
+                toast.success('Preview ready for approval!');
+            } else {
+                toast.error(data.error || 'Failed to generate 3D model');
+            }
+        } catch {
+            toast.error('An error occurred');
+        } finally {
+            setIsGenerating3D(false);
+        }
+    };
+
+    const handleSave3D = async () => {
+        setIsSaving3D(true);
+        try {
+            const res = await fetch(`/api/products/${existingProduct._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model_3d_url: preview3DUrl,
+                    model_3d_status: 'ready'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                updateField('model_3d_url', preview3DUrl);
+                updateField('model_3d_status', 'ready');
+                setShowPreviewModal(false);
+                toast.success('3D model published to your product!');
+            } else {
+                toast.error(data.error || 'Failed to save 3D model');
+            }
+        } catch {
+            toast.error('Failed to save 3D model');
+        } finally {
+            setIsSaving3D(false);
         }
     };
 
@@ -341,7 +405,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                     city: form.city,
                                     productId: existingProduct?._id || null,
                                 }}
-                                onFAQsGenerated={(faqs) => updateField('ai_generated_faqs', faqs)}
+                                onFAQsGenerated={(faqs) => updateField('ai_generated_faqs', faqs.map(f => ({ ...f, approved: true })))}
                                 disabled={false}
                             />
                             {form.ai_generated_faqs.length > 0 && (
@@ -453,13 +517,11 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                 </div>
                                 {isEdit && existingProduct?._id ? (
                                     <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            window.open(`/shop/${existingProduct._id}`, '_blank');
-                                        }}
-                                        className="text-xs px-4 py-2 bg-[#8B5CF6] text-white rounded-lg hover:brightness-110 shadow-[0_0_15px_rgba(139,92,246,0.2)] transition-all font-medium"
+                                        onClick={handleGenerate3D}
+                                        disabled={isGenerating3D}
+                                        className="text-xs px-4 py-2 bg-[#8B5CF6] text-white rounded-lg hover:brightness-110 shadow-[0_0_15px_rgba(139,92,246,0.2)] transition-all font-medium disabled:opacity-50"
                                     >
-                                        Go generate in Viewer ✨
+                                        {isGenerating3D ? 'Generating...' : 'Generate 3D Model ✨'}
                                     </button>
                                 ) : (
                                     <div className="text-[10px] px-3 py-1.5 rounded bg-white/5 border border-white/10 text-white/40 font-medium">
@@ -489,6 +551,60 @@ export default function ProductUploadForm({ existingProduct = null }) {
                                 {loading ? 'Saving...' : isEdit ? 'Update & Publish' : 'Publish Product'}
                             </button>
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 3D Preview Modal */}
+            <AnimatePresence>
+                {showPreviewModal && preview3DUrl && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-[#0F0F14] border border-white/10 rounded-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+                                <h3 className="text-white/90 font-semibold flex items-center gap-2">
+                                    <span className="text-[#8B5CF6]">✦</span> 3D Model Preview
+                                </h3>
+                                <button
+                                    onClick={(e) => { e.preventDefault(); setShowPreviewModal(false); }}
+                                    disabled={isSaving3D}
+                                    className="text-white/40 hover:text-white transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div className="flex-1 w-full bg-[#050505] relative min-h-[400px]">
+                                <ProductModelViewer modelUrl={preview3DUrl} productTitle={form.title} />
+                            </div>
+
+                            <div className="p-4 border-t border-white/10 bg-white/5 flex items-center justify-end gap-3 pointer-events-auto">
+                                <button
+                                    onClick={(e) => { e.preventDefault(); setShowPreviewModal(false); }}
+                                    disabled={isSaving3D}
+                                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all border border-white/10 disabled:opacity-50"
+                                >
+                                    Discard
+                                </button>
+                                <button
+                                    onClick={(e) => { e.preventDefault(); handleSave3D(); }}
+                                    disabled={isSaving3D}
+                                    className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-50"
+                                    style={{ background: '#8B5CF6' }}
+                                >
+                                    {isSaving3D ? 'Saving...' : 'Approve & Save Live'}
+                                </button>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
