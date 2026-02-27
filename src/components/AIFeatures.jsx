@@ -7,43 +7,92 @@ const features = [
         id: 1,
         icon: (
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                <path d="M14 8l-2-2-2 2" />
-                <path d="M12 6v6" />
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
         ),
-        sparkle: "✨",
-        title: "Smart Product FAQs",
-        body: "AI generates answers about materials, care, and customization — so artisans spend time crafting, not typing.",
+        sparkle: "🎬",
+        title: "Cinematic Product Storytelling",
+        body: "Immersive storytelling interface highlighting artisan identity, heritage, and product journey.",
     },
     {
         id: 2,
         icon: (
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 3v18h18" />
-                <path d="M18 17V9" />
-                <path d="M13 17V5" />
-                <path d="M8 17v-3" />
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
         ),
         sparkle: "⚖️",
-        title: "Fair Pricing Engine",
-        body: "Real-time market analysis ensures artisans are always compensated fairly — and buyers always know why.",
+        title: "AI-Based Pricing Insights",
+        body: "AI-driven pricing recommendations based on product details and market trends.",
     },
     {
         id: 3,
         icon: (
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 19l7-7 3 3-7 7-3-3z" />
-                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-                <path d="M2 2l7.586 7.586" />
-                <circle cx="11" cy="11" r="2" />
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                <path d="M14 8l-2-2-2 2" />
+                <path d="M12 6v6" />
             </svg>
         ),
-        sparkle: "🎨",
-        title: "AI Customization Preview",
-        body: "Upload a reference image. We generate a preview of your customized product before a single thread is pulled.",
+        sparkle: "💡",
+        title: "AI-Generated FAQs",
+        body: "Automatic FAQ generation from product descriptions to assist buyers instantly.",
     },
+    {
+        id: 4,
+        icon: (
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                <circle cx="11" cy="11" r="3"></circle>
+            </svg>
+        ),
+        sparkle: "📸",
+        title: "AI-Powered Visual Search",
+        body: "Image-based search to help users discover visually similar handcrafted products.",
+    },
+    {
+        id: 5,
+        icon: (
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                <path d="M8 9h8"></path>
+                <path d="M8 13h6"></path>
+            </svg>
+        ),
+        sparkle: "🤖",
+        title: "Intelligent AI Chatbot",
+        body: "Real-time assistance for product queries and platform guidance.",
+    },
+    {
+        id: 6,
+        icon: (
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2A10 10 0 0 0 2 12c0 2.38.83 4.56 2.21 6.27L3 22l3.73-1.21A9.95 9.95 0 0 0 12 22a10 10 0 0 0 0-20z"></path>
+                <path d="M16 12H8"></path>
+                <path d="M12 8v8"></path>
+            </svg>
+        ),
+        sparkle: "🛠️",
+        title: "Customization Through Chat",
+        body: "Direct buyer–artisan communication for personalized product customization.",
+    },
+    {
+        id: 7,
+        icon: (
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+                <polyline points="2 6 6 2 12 8 18 2 22 6"></polyline>
+            </svg>
+        ),
+        sparkle: "📈",
+        title: "AI Selling Suggestions",
+        body: "Smart recommendations to optimize product listings and improve sales performance.",
+    }
 ];
 
 const containerVariants = {
@@ -83,7 +132,7 @@ export default function AIFeatures() {
                         className="text-xs uppercase tracking-[0.3em] text-[#E8A838] mb-4 block"
                         style={{ fontFamily: "var(--font-space)" }}
                     >
-                        Powered by AI
+                        Features
                     </span>
                     <h2
                         className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4"
@@ -105,7 +154,7 @@ export default function AIFeatures() {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                 >
                     {features.map((feature) => (
                         <motion.div
