@@ -113,6 +113,16 @@ const ProductSchema = new mongoose.Schema(
                 order: { type: Number, default: 0 },
             },
         ],
+        feedback: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+                name: { type: String, required: true },
+                rating: { type: Number, required: true, min: 1, max: 5 },
+                comment: { type: String, required: true },
+                approved: { type: Boolean, default: false },
+                createdAt: { type: Date, default: Date.now }
+            }
+        ],
         translation_cache: {
             type: Map,
             of: String,

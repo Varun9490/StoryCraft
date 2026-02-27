@@ -16,6 +16,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useViewTracker } from '@/hooks/useViewTracker';
 import WishlistButton from '@/components/ui/WishlistButton';
 import Head from 'next/head';
+import ProductFeedback from '@/components/shop/ProductFeedback';
 
 const ProductModelViewer = dynamic(() => import('@/components/three/ProductModelViewer'), { ssr: false });
 
@@ -383,6 +384,8 @@ export default function ProductDetailPage({ params }) {
                         </div>
 
                         <FAQAccordion faqs={translatedFaqs} productTitle={product.title} />
+
+                        <ProductFeedback productId={product._id} initialFeedback={product.feedback || []} user={user} />
 
                         {(product.model_3d_url || isOwner) && (
                             <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px] mt-12 border border-white/5">

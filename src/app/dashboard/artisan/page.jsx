@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import DashboardStatCard from '@/components/dashboard/DashboardStatCard';
 import ProductListTable from '@/components/dashboard/ProductListTable';
+import toast from 'react-hot-toast';
 
 export default function ArtisanDashboard() {
     const { user } = useAuth();
@@ -74,6 +75,46 @@ export default function ArtisanDashboard() {
         const maxVal = Math.max(...rawData, 1);
         return rawData.map(val => (val / maxVal) * 100);
     }, [orders]);
+
+    // Aggregate real feedback from products
+    const allFeedback = useMemo(() => {
+        let feed = [];
+        products.forEach(p => {
+            if (p.feedback && p.feedback.length > 0) {
+                p.feedback.forEach(f => {
+                    feed.push({ ...f, productTitle: p.title });
+                });
+            }
+        });
+        feed.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        return feed.slice(0, 10);
+    }, [products]);
+
+    const handleApproveFeedback = async (productId, feedbackId) => {
+        try {
+            const res = await fetch(`/api/products/${productId}/feedback/${feedbackId}`, {
+                method: 'PATCH'
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Feedback approved and visible to customers!');
+                // Update local state to reflect approval
+                setProducts(prev => prev.map(p => {
+                    if (p._id === productId) {
+                        return {
+                            ...p,
+                            feedback: p.feedback.map(f => f._id === feedbackId ? { ...f, approved: true } : f)
+                        };
+                    }
+                    return p;
+                }));
+            } else {
+                toast.error(data.error || 'Failed to approve');
+            }
+        } catch (err) {
+            toast.error('An error occurred');
+        }
+    };
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-12">
@@ -335,10 +376,11 @@ export default function ArtisanDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                        { name: "Priya S.", product: products[0]?.title || "Handcrafted Item", text: "The detail and craftsmanship on this piece is unbelievable. It looks perfect in my living room!", rating: 5, date: "2 days ago" },
-                        { name: "Arjun M.", product: products[1]?.title || "Custom Order", text: "Loved the personalization process. The artisan was incredibly communicative and brought my vision to life.", rating: 5, date: "1 week ago" }
-                    ].map((review, i) => (
+                    {allFeedback.length === 0 ? (
+                        <div className="col-span-1 md:col-span-2 p-4 rounded-xl bg-black/40 border border-white/5 text-sm text-white/60 text-center">
+                            No feedback available yet.
+                        </div>
+                    ) : (allFeedback.map((review, i) => (
                         <div key={i} className="p-5 rounded-xl bg-black/40 border border-white/5 hover:border-white/10 transition-colors">
                             <div className="flex justify-between items-start mb-3">
                                 <div>
@@ -348,14 +390,29 @@ export default function ArtisanDashboard() {
                                             ✓ Verified Buyer
                                         </span>
                                     </p>
-                                    <p className="text-xs text-white/40 mt-1">Purchased: <span className="text-white/60">{review.product}</span></p>
+                                    <p className="text-xs text-white/40 mt-1">Purchased: <span className="text-white/60">{review.productTitle}</span></p>
                                 </div>
-                                <span className="text-xs text-white/30">{review.date}</span>
+                                <span className="text-xs text-white/30">{new Date(review.createdAt).toLocaleDateString()}</span>
                             </div>
-                            <div className="flex text-[#E8A838] text-xs mb-2">{'★'.repeat(review.rating)}</div>
-                            <p className="text-sm text-white/60 italic">"{review.text}"</p>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex text-[#E8A838] text-xs">
+                                    {'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}
+                                </div>
+                                {!review.approved && (
+                                    <button
+                                        onClick={() => handleApproveFeedback(products.find(p => p.title === review.productTitle)?._id, review._id)}
+                                        className="text-[10px] bg-[#C4622D]/20 text-[#C4622D] border border-[#C4622D]/40 px-2 py-1 rounded hover:bg-[#C4622D]/40 transition-colors"
+                                    >
+                                        Approve
+                                    </button>
+                                )}
+                                {review.approved && (
+                                    <span className="text-[10px] text-[#52B788]">Approved</span>
+                                )}
+                            </div>
+                            <p className="text-sm text-white/60 italic">"{review.comment}"</p>
                         </div>
-                    ))}
+                    )))}
                 </div>
             </motion.div>
         </div>

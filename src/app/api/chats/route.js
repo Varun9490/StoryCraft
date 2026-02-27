@@ -47,7 +47,7 @@ export async function POST(request) {
         const decoded = verifyJWT(token);
         if (!decoded) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
-        
+
         const { artisanId, productId, initialMessage, messageType, referenceImageUrl, customizationDescription } = body;
 
         if (!artisanId || !productId) {
@@ -62,15 +62,38 @@ export async function POST(request) {
         const buyerUserId = decoded.userId;
 
         // De-duplicate: check for existing chat 
-        const existingChat = await Chat.findOne({
+        let chat = await Chat.findOne({
             participants: { $all: [buyerUserId, artisanUserId] },
-            product: productId,
-        })
-            .populate('participants', 'name avatar role')
-            .populate('product', 'title images price is_customizable');
+        });
 
-        if (existingChat) {
-            return NextResponse.json({ success: true, data: { chat: existingChat } }, { status: 200 });
+        if (chat) {
+            if (initialMessage) {
+                chat.messages.push({
+                    sender: buyerUserId,
+                    content: initialMessage,
+                    message_type: messageType || 'text',
+                    image_url: referenceImageUrl || '',
+                    read: false,
+                    createdAt: new Date(),
+                });
+                chat.last_message = initialMessage;
+                chat.last_message_at = new Date();
+
+                if (messageType === 'customization_request') {
+                    chat.customization_status = 'requested';
+                    if (referenceImageUrl) chat.customization_reference_image = referenceImageUrl;
+                    if (customizationDescription) chat.customization_description = customizationDescription;
+                }
+
+                chat.product = productId; // update to the active product they are looking at
+                await chat.save();
+            }
+
+            const populatedExisting = await Chat.findById(chat._id)
+                .populate('participants', 'name avatar role')
+                .populate('product', 'title images price is_customizable');
+
+            return NextResponse.json({ success: true, data: { chat: populatedExisting } }, { status: 200 });
         }
 
         // Create new chat

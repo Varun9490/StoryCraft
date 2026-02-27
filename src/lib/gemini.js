@@ -2,14 +2,29 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 let keyIndex = 0;
 
+const fallbackKeys = [
+    "AIzaSyAAm61ELkrz_XqMrcmaPViCKDaf3lalX90",
+    "AIzaSyA7jkaXeiOSz0U01YqQZIllG0QOV0rE8XI",
+    "AIzaSyA_yHsro-_UpHBi7FhacinV5tnqX8A37d8",
+    "AIzaSyABp0IBCE90_mhITPXyrVWlRyXsjRLJhXs",
+];
+
 export function getApiKey() {
-    const keys = [
+    let keys = [
         process.env.GEMINI_API_KEY,
         process.env.GEMINI_API_KEY2,
         process.env.GEMINI_API_KEY3,
         process.env.GEMINI_API_KEY4,
         process.env.GEMINI_API_KEY5,
     ].filter(Boolean);
+
+    // Filter out the known expired key specifically if it accidentally gets loaded
+    keys = keys.filter(k => k !== "AIzaSyB4Cf4g8MVL6H573swWqPdCbLuSJlipW3M");
+
+    // Use fallbacks if no working valid keys are found in process.env
+    if (keys.length === 0) {
+        keys = fallbackKeys;
+    }
 
     if (keys.length === 0) return null;
     const key = keys[keyIndex % keys.length];
