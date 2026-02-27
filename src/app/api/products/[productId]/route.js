@@ -12,6 +12,8 @@ import { verifyJWT } from '@/lib/auth';
 
 
 
+export const dynamic = 'force-dynamic';
+
 // GET — single product
 export async function GET(request, { params }) {
     try {

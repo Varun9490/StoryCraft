@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
+import ProductCard from '@/components/shop/ProductCard';
 
 const STATUS_STEPS = [
     { key: 'pending', label: 'Order Placed', icon: '📋' },
@@ -25,6 +26,7 @@ export default function OrderConfirmationPage({ params }) {
     const [updateStatus, setUpdateStatus] = useState('');
     const [updatePaymentStatus, setUpdatePaymentStatus] = useState('');
     const [updateMessage, setUpdateMessage] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -36,6 +38,17 @@ export default function OrderConfirmationPage({ params }) {
                     setUpdateStatus(data.data.order.status);
                     setUpdatePaymentStatus(data.data.order.payment_status);
                     setUpdateMessage(data.data.order.storytelling_status);
+
+                    // Fetch suggestions for cross-sell (e.g. popular items in general)
+                    try {
+                        const sugRes = await fetch(`/api/products?limit=4`, { cache: 'no-store' });
+                        const sugData = await sugRes.json();
+                        if (sugData.success) {
+                            // Filter out products already in this order to avoid repeating
+                            const orderedProductIds = data.data.order.items?.map(i => i.product?.toString()) || [];
+                            setSuggestions(sugData.data.products.filter(p => !orderedProductIds.includes(p._id.toString())).slice(0, 4));
+                        }
+                    } catch (e) { }
                 }
             } catch { }
             setLoading(false);
@@ -267,6 +280,27 @@ export default function OrderConfirmationPage({ params }) {
                     </div>
                 )}
             </div>
+
+            {/* Suggestions Section */}
+            {!isSeller && suggestions.length > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mt-20 max-w-5xl mx-auto border-t border-white/10 pt-16 px-6 pb-20"
+                >
+                    <h2 className="text-xl md:text-2xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-playfair)' }}>
+                        People who bought this also bought
+                    </h2>
+                    <p className="text-white/50 text-sm mb-8">You might like these beautiful additions to your collection</p>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        {suggestions.map((p) => (
+                            <ProductCard key={p._id} product={p} />
+                        ))}
+                    </div>
+                </motion.div>
+            )}
         </main>
     );
 }

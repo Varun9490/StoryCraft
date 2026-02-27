@@ -6,6 +6,8 @@ import { verifyJWT } from '@/lib/auth';
 import { apiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
 
+export const dynamic = 'force-dynamic';
+
 // GET — list products with filters (public)
 export async function GET(request) {
     try {

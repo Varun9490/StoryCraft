@@ -4,9 +4,34 @@ import { useCart } from '@/contexts/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import CartItem from './CartItem';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function CartDrawer() {
     const { items, isOpen, dispatch, cartTotal, cartCount } = useCart();
+    const [suggestions, setSuggestions] = useState([]);
+
+    useEffect(() => {
+        if (!isOpen || items.length === 0) return;
+
+        const fetchSuggestions = async () => {
+            try {
+                // Get unique categories from items in cart
+                const categories = [...new Set(items.map(i => i.product.category).filter(Boolean))];
+                if (categories.length === 0) return;
+
+                // Just fetch based on the first category for simplicity
+                const res = await fetch(`/api/products?category=${categories[0]}&limit=3`, { cache: 'no-store' });
+                const data = await res.json();
+                if (data.success) {
+                    const cartProductIds = items.map(i => i.product._id);
+                    setSuggestions(data.data.products.filter(p => !cartProductIds.includes(p._id)).slice(0, 2));
+                }
+            } catch (err) { }
+        };
+
+        fetchSuggestions();
+    }, [isOpen, items]);
 
     return (
         <AnimatePresence>
@@ -74,6 +99,45 @@ export default function CartDrawer() {
                                         <CartItem key={item.product._id} item={item} />
                                     ))}
                                 </AnimatePresence>
+                            )}
+
+                            {/* Cart Suggestions */}
+                            {items.length > 0 && suggestions.length > 0 && (
+                                <div className="mt-8 pt-6 border-t border-white/10">
+                                    <p className="text-xs text-white/50 uppercase tracking-wider mb-4 font-medium">You might also like</p>
+                                    <div className="space-y-3">
+                                        {suggestions.map((p) => (
+                                            <div key={p._id} className="flex gap-3 items-center bg-white/[0.02] p-2 rounded-xl border border-white/5">
+                                                <div className="w-12 h-12 relative rounded-lg overflow-hidden shrink-0 bg-[#111]">
+                                                    <Image
+                                                        src={p.images[0]?.url || p.images[0] || '/placeholder.png'}
+                                                        alt={p.title}
+                                                        fill
+                                                        className="object-cover"
+                                                        sizes="48px"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <Link href={`/shop/${p._id}`} onClick={() => dispatch({ type: 'SET_DRAWER', payload: false })} className="text-sm text-white/90 font-medium truncate block hover:text-[#C4622D] transition-colors">
+                                                        {p.title}
+                                                    </Link>
+                                                    <p className="text-xs text-[#C4622D]">₹{p.price}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        dispatch({
+                                                            type: 'ADD_ITEM',
+                                                            payload: { product: { _id: p._id, title: p.title, price: p.price, images: p.images, stock: p.stock, artisan: p.artisan } }
+                                                        });
+                                                    }}
+                                                    className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center shrink-0 transition-colors"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
                         </div>
 

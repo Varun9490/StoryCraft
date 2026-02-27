@@ -18,6 +18,7 @@ import WishlistButton from '@/components/ui/WishlistButton';
 import Head from 'next/head';
 import ProductFeedback from '@/components/shop/ProductFeedback';
 import CustomizationModal from '@/components/shop/CustomizationModal';
+import ProductCard from '@/components/shop/ProductCard';
 
 const ProductModelViewer = dynamic(() => import('@/components/three/ProductModelViewer'), { ssr: false });
 
@@ -76,6 +77,7 @@ export default function ProductDetailPage({ params }) {
     const [quantity, setQuantity] = useState(1);
     const { dispatch } = useCart();
     const [faqs, setFaqs] = useState([]);
+    const [suggestions, setSuggestions] = useState([]);
     const { user } = useAuth();
     const { lang, toggleLang, t, loading: translating } = useTranslation(productId);
     const [showCustomModal, setShowCustomModal] = useState(false);
@@ -85,10 +87,20 @@ export default function ProductDetailPage({ params }) {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await fetch(`/api/products/${productId}`);
+                const res = await fetch(`/api/products/${productId}`, { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success) {
                     setProduct(data.data.product);
+
+                    // Fetch suggestions based on category
+                    try {
+                        const sugRes = await fetch(`/api/products?category=${data.data.product.category}&limit=5`, { cache: 'no-store' });
+                        const sugData = await sugRes.json();
+                        if (sugData.success) {
+                            // Exclude current product from suggestions
+                            setSuggestions(sugData.data.products.filter(p => p._id !== productId).slice(0, 4));
+                        }
+                    } catch (e) { }
                 }
             } catch { }
             setLoading(false);
@@ -427,6 +439,27 @@ export default function ProductDetailPage({ params }) {
                         )}
                     </motion.div>
                 </div>
+
+                {/* Suggestions Section */}
+                {suggestions.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="mt-32 max-w-7xl mx-auto border-t border-white/10 pt-16"
+                    >
+                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-playfair)' }}>
+                            You might also like
+                        </h2>
+                        <p className="text-white/50 text-sm mb-10">Discover similar handcrafted treasures from our artisans</p>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                            {suggestions.map((p) => (
+                                <ProductCard key={p._id} product={p} />
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
             </div>
         </main>
     );
