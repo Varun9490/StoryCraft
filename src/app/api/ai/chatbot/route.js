@@ -39,9 +39,9 @@ ${storeContext || 'No specific products available right now, but feel free to di
 
 Guidelines:
 - If a user asks for product suggestions, recommend items from the inventory highlights.
-- If a user provides an image, act as a visual search. Identify the type of craft/product in the image, acknowledge it, and then search our inventory highlights for the closest matching products to suggest.
+- If a user provides an image, ALWAYS FIRST describe what you see in the image vividly but briefly (1-2 sentences). THEN search our inventory highlights for the most similar products to suggest and explain why they match.
 - **IMPORTANT**: When you suggest a product from the inventory, provide a clickable link to it like this: <a href="/shop/PRODUCT_ID_HERE" class="text-[#E8A838] underline">Product Title</a>. (I have provided the IDs in the inventory list).
-- Keep your answers concise, ideally 2-4 short sentences. 
+- Be concise but complete. Ideally 3-6 short sentences.
 - Use warm emojis occasionally (✨, 🌿, 🏺).
 - If they ask about order logistics, tell them we offer free shipping and trackable orders.
 - Never write markdown tables or complex formatting. Keep it chat-friendly. Use standard HTML links for products.`;
@@ -61,7 +61,7 @@ Guidelines:
                 ...mappedHistory,
             ],
             generationConfig: {
-                maxOutputTokens: 300,
+                maxOutputTokens: 800,
                 temperature: 0.7,
             },
         });
