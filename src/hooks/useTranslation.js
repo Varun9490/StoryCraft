@@ -11,14 +11,16 @@ export function useTranslation(productId) {
     const fetchedRef = useRef(new Set());
 
     const translate = useCallback(async (fields, targetLang = 'te') => {
-        const cacheKey = `${productId}_${targetLang}_${fields.sort().join(',')}`;
+        const sortedFields = [...fields].sort().join(',');
+        const cacheKey = `${productId}_${targetLang}_${sortedFields}`;
+
         if (clientCache.has(cacheKey)) {
             setTranslations(prev => ({ ...prev, ...clientCache.get(cacheKey) }));
             setLang(targetLang);
             return;
         }
-        if (fetchedRef.current.has(cacheKey)) return;
-        fetchedRef.current.add(cacheKey);
+
+        if (loading) return; // prevent double clicks while loading
 
         setLoading(true);
         try {
@@ -32,13 +34,15 @@ export function useTranslation(productId) {
                 clientCache.set(cacheKey, data.data.translations);
                 setTranslations(prev => ({ ...prev, ...data.data.translations }));
                 setLang(targetLang);
+            } else {
+                console.error('[Translation API Error]:', data.error);
             }
         } catch (err) {
-            console.error('Translation error:', err);
+            console.error('Translation network error:', err);
         } finally {
             setLoading(false);
         }
-    }, [productId]);
+    }, [productId, loading]);
 
     const toggleLang = useCallback((fields) => {
         if (lang === 'en') {
