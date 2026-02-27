@@ -7,7 +7,7 @@ const footerLinks = [
     "Artisans",
     "Craft Categories",
     "Traceability",
-    "AI Features",
+    "Features",
     "Blog",
     "Contact",
 ];

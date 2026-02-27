@@ -10,7 +10,7 @@ const publicNavItems = [
     { label: "Artisans", href: "/#artisans" },
     { label: "Shop", href: "/shop" },
     { label: "Chat", href: "/chat" },
-    { label: "AI Features", href: "/#ai-features" },
+    { label: "Features", href: "/#ai-features" },
 ];
 
 export default function Navbar({ accountMode = false }) {
