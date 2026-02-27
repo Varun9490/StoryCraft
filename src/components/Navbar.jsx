@@ -100,6 +100,23 @@ export default function Navbar() {
                         user ? (
                             <>
                                 <a
+                                    href="/account"
+                                    className={`flex items-center gap-2 text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
+                                        ? "text-[#1A1209]/70 hover:text-[#C4622D]"
+                                        : "text-white/70 hover:text-[#C4622D]"
+                                        }`}
+                                    style={{ fontFamily: "var(--font-inter)" }}
+                                >
+                                    {user.avatar ? (
+                                        <img src={user.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/20" />
+                                    ) : (
+                                        <span className="w-6 h-6 rounded-full bg-[#C4622D]/20 border border-[#C4622D]/30 flex items-center justify-center text-[10px] text-[#C4622D] font-bold">
+                                            {user.name?.charAt(0)?.toUpperCase()}
+                                        </span>
+                                    )}
+                                    Account
+                                </a>
+                                <a
                                     href="/dashboard"
                                     className={`text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
                                         ? "text-[#1A1209]/70 hover:text-[#C4622D]"
@@ -201,6 +218,17 @@ export default function Navbar() {
                     {!loading && (
                         user ? (
                             <>
+                                <a
+                                    href="/account"
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`block py-3 text-sm font-medium border-b transition-colors ${isOnLight
+                                        ? "border-[#E5DDD4] text-[#1A1209]/70 hover:text-[#C4622D]"
+                                        : "border-white/10 text-white/70 hover:text-[#C4622D]"
+                                        }`}
+                                    style={{ fontFamily: "var(--font-inter)" }}
+                                >
+                                    👤 My Account
+                                </a>
                                 <a
                                     href="/dashboard"
                                     onClick={() => setMobileOpen(false)}

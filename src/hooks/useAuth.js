@@ -22,6 +22,16 @@ export function useAuth() {
         return false;
     }, []);
 
+    const refetchUser = useCallback(async () => {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+            if (data.success) {
+                setUser(data.data.user);
+            }
+        } catch { }
+    }, []);
+
     useEffect(() => {
         async function fetchUser() {
             try {
@@ -77,5 +87,5 @@ export function useAuth() {
         }
     }
 
-    return { user, loading, error, logout, refreshSession };
+    return { user, loading, error, logout, refreshSession, refetchUser };
 }
