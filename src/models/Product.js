@@ -106,7 +106,10 @@ const ProductSchema = new mongoose.Schema(
                 heading: { type: String, default: '' },
                 body: { type: String, default: '' },
                 image_url: { type: String, default: '' },
-                layout: { type: String, enum: ['text-left', 'text-right', 'full-image', 'centered'], default: 'text-left' },
+                layout: { type: String, enum: ['text-left', 'text-right', 'full-image', 'centered', 'text-top', 'text-bottom'], default: 'text-left' },
+                text_position: { type: String, enum: ['center', 'top', 'bottom', 'left', 'right'], default: 'center' }, // For full-image text positioning
+                text_animation: { type: String, enum: ['fade', 'slide-up', 'slide-left', 'slide-right'], default: 'slide-up' },
+                image_animation: { type: String, enum: ['fade', 'clip-reveal', 'slide-left', 'slide-right', 'zoom-in'], default: 'clip-reveal' },
                 order: { type: Number, default: 0 },
             },
         ],

@@ -7,10 +7,35 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 const LAYOUTS = [
-    { value: 'text-left', label: 'Text Left' },
-    { value: 'text-right', label: 'Text Right' },
-    { value: 'full-image', label: 'Full Image' },
-    { value: 'centered', label: 'Centered' },
+    { value: 'text-left', label: 'Image Right, Text Left' },
+    { value: 'text-right', label: 'Image Left, Text Right' },
+    { value: 'text-top', label: 'Image Bottom, Text Top' },
+    { value: 'text-bottom', label: 'Image Top, Text Bottom' },
+    { value: 'full-image', label: 'Full Image Background' },
+    { value: 'centered', label: 'Centered Stack' },
+];
+
+const TEXT_POSITIONS = [
+    { value: 'center', label: 'Center' },
+    { value: 'top', label: 'Top' },
+    { value: 'bottom', label: 'Bottom' },
+    { value: 'left', label: 'Left' },
+    { value: 'right', label: 'Right' },
+];
+
+const TEXT_ANIMATIONS = [
+    { value: 'slide-up', label: 'Slide Up' },
+    { value: 'fade', label: 'Fade In' },
+    { value: 'slide-left', label: 'Slide Left' },
+    { value: 'slide-right', label: 'Slide Right' },
+];
+
+const IMAGE_ANIMATIONS = [
+    { value: 'clip-reveal', label: 'Clip Reveal' },
+    { value: 'fade', label: 'Fade In' },
+    { value: 'slide-left', label: 'Slide Left' },
+    { value: 'slide-right', label: 'Slide Right' },
+    { value: 'zoom-in', label: 'Zoom In' },
 ];
 
 export default function StoryEditorPage({ params }) {
@@ -38,7 +63,14 @@ export default function StoryEditorPage({ params }) {
     }, [productId]);
 
     const addPanel = () => {
-        setPanels(prev => [...prev, { heading: '', body: '', image_url: '', layout: 'text-left', order: prev.length }]);
+        setPanels(prev => [...prev, {
+            heading: '', body: '', image_url: '',
+            layout: 'text-left',
+            text_position: 'center',
+            text_animation: 'slide-up',
+            image_animation: 'clip-reveal',
+            order: prev.length
+        }]);
     };
 
     const updatePanel = (idx, field, value) => {
@@ -196,13 +228,53 @@ export default function StoryEditorPage({ params }) {
                                     </label>
                                 </div>
 
-                                <select
-                                    value={panel.layout}
-                                    onChange={e => updatePanel(idx, 'layout', e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
-                                >
-                                    {LAYOUTS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-                                </select>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs text-white/40 mb-1 block">Layout Style</label>
+                                        <select
+                                            value={panel.layout || 'text-left'}
+                                            onChange={e => updatePanel(idx, 'layout', e.target.value)}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
+                                        >
+                                            {LAYOUTS.map(l => <option key={l.value} value={l.value} className="bg-[#050505]">{l.label}</option>)}
+                                        </select>
+                                    </div>
+
+                                    {panel.layout === 'full-image' && (
+                                        <div>
+                                            <label className="text-xs text-white/40 mb-1 block">Text Overlay Position</label>
+                                            <select
+                                                value={panel.text_position || 'center'}
+                                                onChange={e => updatePanel(idx, 'text_position', e.target.value)}
+                                                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
+                                            >
+                                                {TEXT_POSITIONS.map(l => <option key={l.value} value={l.value} className="bg-[#050505]">{l.label}</option>)}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="text-xs text-white/40 mb-1 block">Text Animation</label>
+                                        <select
+                                            value={panel.text_animation || 'slide-up'}
+                                            onChange={e => updatePanel(idx, 'text_animation', e.target.value)}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
+                                        >
+                                            {TEXT_ANIMATIONS.map(l => <option key={l.value} value={l.value} className="bg-[#050505]">{l.label}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs text-white/40 mb-1 block">Image Animation</label>
+                                        <select
+                                            value={panel.image_animation || 'clip-reveal'}
+                                            onChange={e => updatePanel(idx, 'image_animation', e.target.value)}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
+                                        >
+                                            {IMAGE_ANIMATIONS.map(l => <option key={l.value} value={l.value} className="bg-[#050505]">{l.label}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             {panel.image_url ? (

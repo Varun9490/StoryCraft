@@ -3,24 +3,17 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
-/* ── great-apes–style clip-path reveal ── */
-const clipReveal = {
-    hidden: { clipPath: 'inset(100% 0 0 0)' },
-    visible: {
-        clipPath: 'inset(0% 0 0 0)',
-        transition: { duration: 1.4, ease: [0.77, 0, 0.18, 1] },
-    },
+const getAnim = (type, delay = 0) => {
+    switch (type) {
+        case 'fade': return { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 1.0, delay } } };
+        case 'slide-up': return { hidden: { opacity: 0, y: 60 }, visible: { opacity: 1, y: 0, transition: { duration: 1.0, delay, ease: [0.22, 1, 0.36, 1] } } };
+        case 'slide-left': return { hidden: { opacity: 0, x: 60 }, visible: { opacity: 1, x: 0, transition: { duration: 1.0, delay, ease: [0.22, 1, 0.36, 1] } } };
+        case 'slide-right': return { hidden: { opacity: 0, x: -60 }, visible: { opacity: 1, x: 0, transition: { duration: 1.0, delay, ease: [0.22, 1, 0.36, 1] } } };
+        case 'clip-reveal': return { hidden: { clipPath: 'inset(100% 0 0 0)' }, visible: { clipPath: 'inset(0% 0 0 0)', transition: { duration: 1.4, delay, ease: [0.77, 0, 0.18, 1] } } };
+        case 'zoom-in': return { hidden: { scale: 1.2, opacity: 0 }, visible: { scale: 1, opacity: 1, transition: { duration: 1.4, delay, ease: [0.22, 1, 0.36, 1] } } };
+        default: return { hidden: { opacity: 0, y: 60 }, visible: { opacity: 1, y: 0, transition: { duration: 1.0, delay, ease: [0.22, 1, 0.36, 1] } } };
+    }
 };
-
-/* ── text slide up / fade ── */
-const textUp = (delay = 0) => ({
-    hidden: { opacity: 0, y: 60 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 1.0, delay, ease: [0.22, 1, 0.36, 1] },
-    },
-});
 
 /* ── horizontal line grow ── */
 const lineGrow = {
@@ -53,8 +46,21 @@ function StoryPanel({ panel, index, total }) {
     const imgY = useTransform(scrollYProgress, [0, 1], ['15%', '-15%']);
     const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.25, 1.05, 1]);
 
+    const txtAnim = panel.text_animation || 'slide-up';
+    const imgAnim = panel.image_animation || 'clip-reveal';
+
     /* ─── full-image: immersive background ─── */
     if (panel.layout === 'full-image') {
+        const getAlignmentClasses = (pos) => {
+            switch (pos) {
+                case 'top': return 'justify-start pt-32 items-center text-center';
+                case 'bottom': return 'justify-end pb-32 items-center text-center';
+                case 'left': return 'justify-center items-start text-left pl-12 md:pl-24';
+                case 'right': return 'justify-center items-end text-right pr-12 md:pr-24';
+                default: return 'justify-center items-center text-center';
+            }
+        };
+
         return (
             <section
                 ref={ref}
@@ -67,37 +73,39 @@ function StoryPanel({ panel, index, total }) {
                             src={panel.image_url}
                             alt={panel.heading}
                             className="w-full h-full object-cover"
-                            variants={clipReveal}
+                            variants={getAnim(imgAnim)}
                             initial="hidden"
                             animate={isInView ? 'visible' : 'hidden'}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/50 to-[#050505]/20" />
                     </motion.div>
                 )}
-                <div className="relative z-10 max-w-4xl text-center px-8">
-                    {panel.heading && (
-                        <motion.h2
-                            variants={textUp(0.2)}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: false, margin: "-10%" }}
-                            className="text-5xl md:text-8xl font-bold text-white leading-[0.95] mb-8"
-                            style={{ fontFamily: 'var(--font-playfair)' }}
-                        >
-                            {panel.heading}
-                        </motion.h2>
-                    )}
-                    {panel.body && (
-                        <motion.p
-                            variants={textUp(0.45)}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: false, margin: "-10%" }}
-                            className="text-base md:text-xl text-white/60 leading-relaxed max-w-2xl mx-auto"
-                        >
-                            {panel.body}
-                        </motion.p>
-                    )}
+                <div className={`relative z-10 w-full h-full max-w-7xl mx-auto flex flex-col ${getAlignmentClasses(panel.text_position)}`}>
+                    <div className="max-w-4xl px-8">
+                        {panel.heading && (
+                            <motion.h2
+                                variants={getAnim(txtAnim, 0.2)}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: false, margin: "-10%" }}
+                                className={`text-5xl md:text-8xl font-bold text-white leading-[0.95] mb-8 ${['left', 'right'].includes(panel.text_position) ? '' : 'mx-auto'}`}
+                                style={{ fontFamily: 'var(--font-playfair)' }}
+                            >
+                                {panel.heading}
+                            </motion.h2>
+                        )}
+                        {panel.body && (
+                            <motion.p
+                                variants={getAnim(txtAnim, 0.45)}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: false, margin: "-10%" }}
+                                className={`text-base md:text-xl text-white/60 leading-relaxed max-w-2xl ${['left', 'right'].includes(panel.text_position) ? '' : 'mx-auto'}`}
+                            >
+                                {panel.body}
+                            </motion.p>
+                        )}
+                    </div>
                 </div>
             </section>
         );
@@ -111,7 +119,7 @@ function StoryPanel({ panel, index, total }) {
                 <div className="max-w-4xl text-center space-y-10">
                     {panel.heading && (
                         <motion.h2
-                            variants={textUp(0)}
+                            variants={getAnim(txtAnim, 0)}
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: false, margin: "-10%" }}
@@ -123,7 +131,7 @@ function StoryPanel({ panel, index, total }) {
                     )}
                     {panel.image_url && (
                         <motion.div
-                            variants={clipReveal}
+                            variants={getAnim(imgAnim)}
                             initial="hidden"
                             animate={isInView ? 'visible' : 'hidden'}
                             className="rounded-2xl overflow-hidden border border-white/5 mx-auto max-w-3xl"
@@ -138,7 +146,7 @@ function StoryPanel({ panel, index, total }) {
                     )}
                     {panel.body && (
                         <motion.p
-                            variants={textUp(0.3)}
+                            variants={getAnim(txtAnim, 0.3)}
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: false, margin: "-10%" }}
@@ -153,6 +161,63 @@ function StoryPanel({ panel, index, total }) {
         );
     }
 
+    /* ─── Top/Bottom Column splits ─── */
+    if (panel.layout === 'text-top' || panel.layout === 'text-bottom') {
+        const isBottom = panel.layout === 'text-bottom';
+        return (
+            <section ref={ref} className="relative min-h-screen flex flex-col overflow-hidden bg-[#0A0503] px-8 py-24">
+                <PanelCounter index={index} total={total} />
+
+                {/* text area */}
+                <div className={`w-full max-w-4xl mx-auto text-center space-y-8 ${isBottom ? 'order-2 mt-24' : 'order-1 mb-24'}`}>
+                    {panel.heading && (
+                        <motion.h2
+                            variants={getAnim(txtAnim, 0)}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
+                            className="text-4xl md:text-6xl font-bold text-white/90 leading-[1.15]"
+                            style={{ fontFamily: 'var(--font-playfair)' }}
+                        >
+                            {panel.heading}
+                        </motion.h2>
+                    )}
+                    {panel.body && (
+                        <motion.p
+                            variants={getAnim(txtAnim, 0.2)}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
+                            className="text-lg md:text-xl text-white/50 leading-relaxed max-w-2xl mx-auto"
+                        >
+                            {panel.body}
+                        </motion.p>
+                    )}
+                    <motion.div variants={lineGrow} initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-10%" }} className="w-20 h-[2px] bg-[#C4622D] mx-auto" />
+                </div>
+
+                {/* image area */}
+                <div className={`w-full max-w-5xl mx-auto h-[60vh] relative ${isBottom ? 'order-1' : 'order-2'}`}>
+                    {panel.image_url && (
+                        <motion.div
+                            variants={getAnim(imgAnim)}
+                            initial="hidden"
+                            animate={isInView ? 'visible' : 'hidden'}
+                            className="absolute inset-0 overflow-hidden rounded-2xl"
+                        >
+                            <motion.img
+                                src={panel.image_url}
+                                alt={panel.heading}
+                                className="w-full h-full object-cover"
+                                style={{ y: imgY, scale: imgScale }}
+                            />
+                        </motion.div>
+                    )}
+                </div>
+            </section>
+        )
+    }
+
     /* ─── text-left / text-right: split layout ─── */
     const isRight = panel.layout === 'text-right';
 
@@ -165,7 +230,7 @@ function StoryPanel({ panel, index, total }) {
                 <div className="max-w-xl w-full flex flex-col justify-center space-y-8">
                     {panel.heading && (
                         <motion.h2
-                            variants={textUp(0)}
+                            variants={getAnim(txtAnim, 0)}
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: false, margin: "-10%" }}
@@ -177,7 +242,7 @@ function StoryPanel({ panel, index, total }) {
                     )}
                     {panel.body && (
                         <motion.p
-                            variants={textUp(0.2)}
+                            variants={getAnim(txtAnim, 0.2)}
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: false, margin: "-10%" }}
@@ -200,7 +265,7 @@ function StoryPanel({ panel, index, total }) {
             <div className={`w-full md:w-1/2 h-[50vh] md:h-screen relative ${isRight ? 'md:order-1' : 'md:order-2'}`}>
                 {panel.image_url && (
                     <motion.div
-                        variants={clipReveal}
+                        variants={getAnim(imgAnim)}
                         initial="hidden"
                         animate={isInView ? 'visible' : 'hidden'}
                         className="absolute inset-0 overflow-hidden"
