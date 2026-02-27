@@ -143,7 +143,7 @@ export default function AccountPage() {
 
     return (
         <main className="min-h-screen bg-[#050505]">
-            <Navbar />
+            <Navbar accountMode={true} />
             <div className="pt-28 pb-20 max-w-2xl mx-auto px-6">
                 {/* Header */}
                 <motion.div

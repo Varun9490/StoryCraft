@@ -69,8 +69,7 @@ function StoryPanel({ panel, index, total }) {
                             className="w-full h-full object-cover"
                             variants={clipReveal}
                             initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: false, margin: "-10%" }}
+                            animate={isInView ? 'visible' : 'hidden'}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/50 to-[#050505]/20" />
                     </motion.div>
@@ -126,8 +125,7 @@ function StoryPanel({ panel, index, total }) {
                         <motion.div
                             variants={clipReveal}
                             initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: false, margin: "-10%" }}
+                            animate={isInView ? 'visible' : 'hidden'}
                             className="rounded-2xl overflow-hidden border border-white/5 mx-auto max-w-3xl"
                         >
                             <motion.img
@@ -204,8 +202,7 @@ function StoryPanel({ panel, index, total }) {
                     <motion.div
                         variants={clipReveal}
                         initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: false, margin: "-10%" }}
+                        animate={isInView ? 'visible' : 'hidden'}
                         className="absolute inset-0 overflow-hidden"
                     >
                         <motion.img

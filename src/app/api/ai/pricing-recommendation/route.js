@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
-import { getFlashModel, generateWithRetry, parseAIJson } from '@/lib/gemini';
+import { getFlashModel, generateWithRetry, parseAIJson, getApiKey } from '@/lib/gemini';
 import { scrapeCompetitorPrices, extractPricesFromResults } from '@/lib/serper';
 import { getCachedPricing, setCachedPricing, buildCacheKey } from '@/lib/pricing-cache';
 import { aiLimiter } from '@/lib/rate-limit';
@@ -27,14 +27,14 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Only artisans can access pricing insights' }, { status: 403 });
         }
 
-        
+
         const { title, description, category, city, material } = body;
 
         if (!title || !category) {
             return NextResponse.json({ success: false, error: 'Title and category are required' }, { status: 400 });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json(
                 { success: false, error: 'AI service not configured.' },
                 { status: 503 }

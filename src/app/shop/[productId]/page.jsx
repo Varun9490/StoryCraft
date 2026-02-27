@@ -339,23 +339,33 @@ export default function ProductDetailPage({ params }) {
                             {product.is_customizable && (
                                 <div className="p-3 rounded-xl bg-[#C4622D]/10 border border-[#C4622D]/20 col-span-2 space-y-2">
                                     <p className="text-sm text-[#C4622D]">🎨 This product can be customized</p>
-                                    <a
-                                        href={`/customize/${product._id}`}
-                                        className="inline-block text-xs px-4 py-2 rounded-lg bg-[#C4622D] text-white font-semibold hover:brightness-110 transition-all"
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            window.dispatchEvent(new CustomEvent('openChatPopup', {
+                                                detail: { artisanId, productId: product._id, type: 'customization_request', initialMessage: 'I would like to request a customization.' }
+                                            }));
+                                        }}
+                                        className="inline-block text-xs px-4 py-2 rounded-lg bg-[#C4622D] text-white font-semibold hover:brightness-110 transition-all text-left w-fit"
                                     >
                                         Request Customization →
-                                    </a>
+                                    </button>
                                 </div>
                             )}
                         </div>
 
                         {artisanId && (
-                            <a
-                                href={`/chat?artisanId=${artisanId}&productId=${product._id}`}
-                                className="flex items-center justify-center gap-2 py-3 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 hover:text-white/90 transition-all text-sm font-medium"
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    window.dispatchEvent(new CustomEvent('openChatPopup', {
+                                        detail: { artisanId, productId: product._id }
+                                    }));
+                                }}
+                                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 hover:text-white/90 transition-all text-sm font-medium mt-4"
                             >
                                 💬 Chat with Artisan
-                            </a>
+                            </button>
                         )}
 
                         {product.tags?.length > 0 && (

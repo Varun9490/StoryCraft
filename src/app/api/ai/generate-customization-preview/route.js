@@ -3,7 +3,7 @@ import connectDB from '@/lib/db';
 import Chat from '@/models/Chat';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGenAI, getApiKey } from '@/lib/gemini';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import { getIO } from '@/lib/socket-server';
 import { aiLimiter } from '@/lib/rate-limit';
@@ -42,7 +42,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Not a participant' }, { status: 403 });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json({ success: false, error: 'AI service not configured' }, { status: 503 });
         }
 
@@ -79,7 +79,7 @@ export async function POST(request) {
         const productBuffer = await productImgRes.arrayBuffer();
         const productBase64 = Buffer.from(productBuffer).toString('base64');
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const genAI = getGenAI();
         const genModel = genAI.getGenerativeModel({
             model: process.env.GEMINI_IMAGE_GEN_MODEL || 'gemini-2.0-flash-preview-image-generation',
             generationConfig: { responseModalities: ['image', 'text'] },

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback, use, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StoryRenderer from '@/components/story/StoryRenderer';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useParams } from 'next/navigation';
 import TranslateToggle from '@/components/shop/TranslateToggle';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function StoryViewerPage({ params }) {
-    const { productId } = use(params);
+export default function StoryViewerPage() {
+    const params = useParams();
+    const productId = params?.productId;
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(true);

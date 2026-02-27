@@ -3,7 +3,7 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import Artisan from '@/models/Artisan';
 import { verifyJWT } from '@/lib/auth';
-import { getFlashModel, generateWithRetry, parseAIJson } from '@/lib/gemini';
+import { getFlashModel, generateWithRetry, parseAIJson, getApiKey } from '@/lib/gemini';
 import { aiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
 
@@ -59,7 +59,7 @@ export async function POST(request) {
         }
 
         // Check GEMINI_API_KEY
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json(
                 { success: false, error: 'AI service not configured. Please set GEMINI_API_KEY.' },
                 { status: 503 }

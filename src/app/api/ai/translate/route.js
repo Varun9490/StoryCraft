@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
-import { getFlashModel, generateWithRetry } from '@/lib/gemini';
+import { getFlashModel, generateWithRetry, getApiKey } from '@/lib/gemini';
 import { aiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
 
@@ -20,7 +20,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'productId and fields array required' }, { status: 400 });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json({ success: false, error: 'AI service not configured' }, { status: 503 });
         }
 

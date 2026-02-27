@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { parseAIJson } from '@/lib/gemini';
+import { parseAIJson, getGenAI, getApiKey } from '@/lib/gemini';
 import { aiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
 
@@ -29,14 +29,14 @@ export async function POST(request) {
 
         const { imageUrl } = body;
 
-        if (!imageUrl || !imageUrl.startsWith('https://res.cloudinary.com')) {
+        if (!imageUrl || (!imageUrl.startsWith('https://') && !imageUrl.startsWith('http://'))) {
             return NextResponse.json(
-                { success: false, error: 'Valid Cloudinary image URL required' },
+                { success: false, error: 'Valid image URL required' },
                 { status: 400 }
             );
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json({ success: false, error: 'AI service not configured' }, { status: 503 });
         }
 
@@ -46,7 +46,7 @@ export async function POST(request) {
         const base64Image = Buffer.from(imageBuffer).toString('base64');
         const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const genAI = getGenAI();
         const model = genAI.getGenerativeModel({
             model: process.env.GEMINI_VISION_MODEL || 'gemini-2.5-flash',
         });

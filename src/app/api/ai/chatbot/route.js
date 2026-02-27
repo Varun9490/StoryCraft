@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGenAI, getApiKey } from '@/lib/gemini';
 import { apiLimiter } from '@/lib/rate-limit';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
@@ -17,7 +17,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Message is required' }, { status: 400 });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json({ success: false, error: 'AI is sleeping right now.' }, { status: 503 });
         }
 
@@ -44,7 +44,7 @@ Guidelines:
 - If they ask about order logistics, tell them we offer free shipping and trackable orders.
 - Never write markdown tables or complex formatting. Keep it chat-friendly.`;
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const genAI = getGenAI();
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const mappedHistory = history.map((msg) => ({

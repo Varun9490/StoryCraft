@@ -54,6 +54,33 @@ function ChatPopout() {
 
     const otherParticipant = chatData?.participants?.find(p => p._id !== user?._id);
 
+    useEffect(() => {
+        const handleOpenPopup = async (e) => {
+            const { artisanId, productId, type, initialMessage } = e.detail;
+            setIsOpen(true);
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/chats`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ artisanId, productId, messageType: type, initialMessage })
+                });
+                const data = await res.json();
+                if (data.success && data.data.chat) {
+                    setChatData(data.data.chat);
+                    setActiveChat(data.data.chat._id);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        window.addEventListener('openChatPopup', handleOpenPopup);
+        return () => window.removeEventListener('openChatPopup', handleOpenPopup);
+    }, []);
+
     if (!user) return null;
 
     return (

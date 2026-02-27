@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGenAI, getApiKey } from '@/lib/gemini';
 import { aiLimiter } from '@/lib/rate-limit';
 import { sanitizeBody } from '@/lib/sanitize';
 
@@ -52,7 +52,7 @@ export async function POST(request) {
             );
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        if (!getApiKey()) {
             return NextResponse.json({ success: false, error: 'AI service not configured' }, { status: 503 });
         }
 
@@ -113,7 +113,7 @@ Rules:
 - Never make up prices — only quote prices from the product context provided
 - If no matching products found, acknowledge and suggest browsing the shop`;
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const genAI = getGenAI();
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         // Build chat history (last 6 exchanges max)

@@ -1,12 +1,26 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-let genAI;
+let keyIndex = 0;
 
-function getGenAI() {
-    if (!genAI) {
-        genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    }
-    return genAI;
+export function getApiKey() {
+    const keys = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY2,
+        process.env.GEMINI_API_KEY3,
+        process.env.GEMINI_API_KEY4,
+        process.env.GEMINI_API_KEY5,
+    ].filter(Boolean);
+
+    if (keys.length === 0) return null;
+    const key = keys[keyIndex % keys.length];
+    keyIndex = (keyIndex + 1) % keys.length;
+    return key;
+}
+
+export function getGenAI() {
+    const key = getApiKey();
+    if (!key) throw new Error('GEMINI API keys are missing. Configure them in .env');
+    return new GoogleGenerativeAI(key);
 }
 
 export function getFlashModel() {
