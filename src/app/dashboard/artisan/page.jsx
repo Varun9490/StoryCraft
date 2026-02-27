@@ -25,12 +25,19 @@ export default function ArtisanDashboard() {
                 ]);
 
                 // Also kick off insights fetch (don't block the dashboard render for AI)
-                fetch('/api/artisan/insights').then(res => res.json()).then(data => {
-                    if (data.success && data.data?.insights) {
-                        setInsights(data.data.insights);
-                    }
+                const cachedInsights = sessionStorage.getItem('artisanInsights');
+                if (cachedInsights) {
+                    setInsights(JSON.parse(cachedInsights));
                     setInsightsLoading(false);
-                }).catch(() => setInsightsLoading(false));
+                } else {
+                    fetch('/api/artisan/insights').then(res => res.json()).then(data => {
+                        if (data.success && data.data?.insights) {
+                            setInsights(data.data.insights);
+                            sessionStorage.setItem('artisanInsights', JSON.stringify(data.data.insights));
+                        }
+                        setInsightsLoading(false);
+                    }).catch(() => setInsightsLoading(false));
+                }
 
                 if (productsRes.ok) {
                     const productsData = await productsRes.json();
