@@ -19,6 +19,6 @@ export default async function DashboardPage() {
     if (decoded.role === 'artisan') {
         redirect('/dashboard/artisan');
     } else {
-        redirect('/dashboard/buyer');
+        redirect('/shop');
     }
 }

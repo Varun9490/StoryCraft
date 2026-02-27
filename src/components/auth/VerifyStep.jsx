@@ -14,7 +14,7 @@ export default function VerifyStep({ user, mode = 'register' }) {
         if (countdown === 0) {
             const role = user?.role || 'buyer';
             router.push(
-                role === 'artisan' ? '/dashboard/artisan' : '/dashboard/buyer'
+                role === 'artisan' ? '/dashboard/artisan' : '/shop'
             );
             return;
         }
@@ -86,7 +86,7 @@ export default function VerifyStep({ user, mode = 'register' }) {
                 className="text-sm text-white/40 mb-6"
                 style={{ fontFamily: 'var(--font-inter)' }}
             >
-                Taking you to your dashboard...
+                Taking you to {user?.role === 'artisan' ? 'your dashboard' : 'the shop'}...
             </motion.p>
 
             <motion.div

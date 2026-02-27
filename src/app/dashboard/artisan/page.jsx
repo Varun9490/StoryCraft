@@ -205,8 +205,8 @@ export default function ArtisanDashboard() {
                     ) : (
                         <div className="bg-black/30 rounded-xl p-4 border border-white/5 h-full">
                             <div className="aspect-video w-full rounded-lg overflow-hidden bg-white/5 mb-4">
-                                {products[0]?.images?.[0] && (
-                                    <img src={products[0].images[0]} alt="Top product" className="w-full h-full object-cover" />
+                                {products[0]?.images?.[0]?.url && (
+                                    <img src={products[0].images[0].url} alt="Top product" className="w-full h-full object-cover" />
                                 )}
                             </div>
                             <p className="font-semibold text-sm text-white/90 truncate">{products[0]?.title || 'No product'}</p>

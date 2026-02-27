@@ -126,16 +126,18 @@ export default function Navbar({ accountMode = false }) {
                                     )}
                                     Account
                                 </a>
-                                <a
-                                    href="/dashboard"
-                                    className={`text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
-                                        ? "text-[#1A1209]/70 hover:text-[#C4622D]"
-                                        : "text-white/70 hover:text-[#C4622D]"
-                                        }`}
-                                    style={{ fontFamily: "var(--font-inter)" }}
-                                >
-                                    Dashboard
-                                </a>
+                                {user.role !== 'buyer' && (
+                                    <a
+                                        href="/dashboard"
+                                        className={`text-sm font-medium transition-colors duration-300 ${isOnLight && isScrolled
+                                            ? "text-[#1A1209]/70 hover:text-[#C4622D]"
+                                            : "text-white/70 hover:text-[#C4622D]"
+                                            }`}
+                                        style={{ fontFamily: "var(--font-inter)" }}
+                                    >
+                                        Dashboard
+                                    </a>
+                                )}
                                 <button
                                     onClick={logout}
                                     className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300"
@@ -236,17 +238,19 @@ export default function Navbar({ accountMode = false }) {
                                 >
                                     👤 My Account
                                 </a>
-                                <a
-                                    href="/dashboard"
-                                    onClick={() => setMobileOpen(false)}
-                                    className={`block py-3 text-sm font-medium border-b transition-colors ${isOnLight
-                                        ? "border-[#E5DDD4] text-[#1A1209]/70 hover:text-[#C4622D]"
-                                        : "border-white/10 text-white/70 hover:text-[#C4622D]"
-                                        }`}
-                                    style={{ fontFamily: "var(--font-inter)" }}
-                                >
-                                    Dashboard
-                                </a>
+                                {user.role !== 'buyer' && (
+                                    <a
+                                        href="/dashboard"
+                                        onClick={() => setMobileOpen(false)}
+                                        className={`block py-3 text-sm font-medium border-b transition-colors ${isOnLight
+                                            ? "border-[#E5DDD4] text-[#1A1209]/70 hover:text-[#C4622D]"
+                                            : "border-white/10 text-white/70 hover:text-[#C4622D]"
+                                            }`}
+                                        style={{ fontFamily: "var(--font-inter)" }}
+                                    >
+                                        Dashboard
+                                    </a>
+                                )}
                                 <button
                                     onClick={() => {
                                         logout();

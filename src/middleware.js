@@ -10,7 +10,18 @@ export async function middleware(request) {
 
     try {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-        await jwtVerify(token, secret);
+        const { payload } = await jwtVerify(token, secret);
+
+        const path = request.nextUrl.pathname;
+
+        if (path.startsWith('/dashboard/artisan') && payload.role !== 'artisan') {
+            return NextResponse.redirect(new URL('/shop', request.url));
+        }
+
+        if (path.startsWith('/dashboard/buyer') && payload.role !== 'buyer') {
+            return NextResponse.redirect(new URL('/dashboard/artisan', request.url));
+        }
+
         return NextResponse.next();
     } catch {
         return NextResponse.redirect(new URL('/login', request.url));

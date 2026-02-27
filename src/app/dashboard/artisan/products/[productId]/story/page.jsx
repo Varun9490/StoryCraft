@@ -96,6 +96,12 @@ export default function StoryEditorPage({ params }) {
         setSaving(false);
     };
 
+    useEffect(() => {
+        if (!authLoading && (!user || user.role !== 'artisan')) {
+            router.push('/login');
+        }
+    }, [user, authLoading, router]);
+
     if (authLoading || loading) {
         return (
             <main className="min-h-screen bg-[#050505]">
@@ -107,12 +113,6 @@ export default function StoryEditorPage({ params }) {
             </main>
         );
     }
-
-    useEffect(() => {
-        if (!authLoading && (!user || user.role !== 'artisan')) {
-            router.push('/login');
-        }
-    }, [user, authLoading, router]);
 
     if (!user || user.role !== 'artisan') return null;
 
