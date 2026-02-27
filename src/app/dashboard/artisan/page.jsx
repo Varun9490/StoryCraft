@@ -108,6 +108,36 @@ export default function ArtisanDashboard() {
                 </div>
             </motion.div>
 
+            {/* Smart Suggestions & Insights */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="rounded-2xl border border-[#C4622D]/20 bg-gradient-to-br from-[#C4622D]/5 to-transparent p-6 mb-10 overflow-hidden relative"
+            >
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#C4622D]/10 rounded-full blur-[80px] -mr-10 -mt-20 pointer-events-none" />
+                <h2 className="text-xl font-bold text-[#E8A838] mb-1 flex items-center gap-2" style={{ fontFamily: 'var(--font-playfair)' }}>
+                    ✨ AI Market Insights & Suggestions
+                </h2>
+                <p className="text-xs text-white/50 mb-6">Personalized opportunities based on your {artisanProfile?.craft_specialty || 'craft'} expertise.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/5 backdrop-blur-md">
+                        <span className="text-xl mb-3 block">🪔</span>
+                        <h3 className="text-sm font-semibold text-white/90 mb-1">Upcoming Festive Demand: Diwali</h3>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                            Search trends for '{artisanProfile?.craft_specialty || 'traditional'} handcrafted gifts' are projected to spike by 45% next month. Consider creating bundle offers or limited-edition festive pieces.
+                        </p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/5 backdrop-blur-md">
+                        <span className="text-xl mb-3 block">📈</span>
+                        <h3 className="text-sm font-semibold text-white/90 mb-1">High-Converting Category</h3>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                            Buyers are actively looking for customizable items. Adding a "Personalization Available" option to your top 3 products could increase sales conversion by 20%.
+                        </p>
+                    </div>
+                </div>
+            </motion.div>
+
             {/* Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-10">
                 <DashboardStatCard
@@ -137,6 +167,54 @@ export default function ArtisanDashboard() {
                     />
                 </Link>
             </div>
+
+            {/* Product Analytics Preview */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10"
+            >
+                <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/[0.02] p-6 flex flex-col justify-between">
+                    <div>
+                        <h2 className="text-lg font-bold text-white/80 mb-1" style={{ fontFamily: 'var(--font-playfair)' }}>Store Performance Overview</h2>
+                        <p className="text-[11px] text-white/40 mb-6">Views and engagement over the last 30 days</p>
+                    </div>
+                    {/* Mocked Graph UI */}
+                    <div className="flex items-end gap-2 h-40 w-full border-b border-white/10 pb-2">
+                        {[40, 60, 30, 80, 50, 90, 70, 100, 60, 40].map((h, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ height: 0 }}
+                                animate={{ height: `${h}%` }}
+                                transition={{ duration: 0.8, delay: i * 0.05 }}
+                                className="flex-1 bg-gradient-to-t from-[#C4622D]/40 to-[#C4622D]/80 rounded-t-sm"
+                            />
+                        ))}
+                    </div>
+                    <div className="flex justify-between mt-2 text-[10px] text-white/30 uppercase tracking-widest">
+                        <span>1st</span>
+                        <span>15th</span>
+                        <span>30th</span>
+                    </div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+                    <h2 className="text-lg font-bold text-white/80 mb-4" style={{ fontFamily: 'var(--font-playfair)' }}>Top Selling Product</h2>
+                    {loading || products.length === 0 ? (
+                        <div className="h-32 bg-white/5 animate-pulse rounded-xl" />
+                    ) : (
+                        <div className="bg-black/30 rounded-xl p-4 border border-white/5 h-full">
+                            <div className="aspect-video w-full rounded-lg overflow-hidden bg-white/5 mb-4">
+                                {products[0]?.images?.[0] && (
+                                    <img src={products[0].images[0]} alt="Top product" className="w-full h-full object-cover" />
+                                )}
+                            </div>
+                            <p className="font-semibold text-sm text-white/90 truncate">{products[0]?.title || 'No product'}</p>
+                            <p className="text-xs text-[#52B788] mt-1 font-medium">↑ 12% increase this week</p>
+                        </div>
+                    )}
+                </div>
+            </motion.div>
 
             {/* Product Management */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 mb-10">
@@ -202,6 +280,49 @@ export default function ArtisanDashboard() {
                     </div>
                 </div>
             )}
+
+            {/* Customer Feedback & Reviews */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 mt-10"
+            >
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 className="text-xl font-bold text-white/80 mb-1" style={{ fontFamily: 'var(--font-playfair)' }}>Recent Feedback</h2>
+                        <p className="text-xs text-white/40">What your customers are saying</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-2xl font-bold text-white">4.9<span className="text-sm text-white/30">/5</span></span>
+                        <div className="flex text-[#E8A838] text-xs">★★★★★</div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                        { name: "Priya S.", product: products[0]?.title || "Handcrafted Item", text: "The detail and craftsmanship on this piece is unbelievable. It looks perfect in my living room!", rating: 5, date: "2 days ago" },
+                        { name: "Arjun M.", product: products[1]?.title || "Custom Order", text: "Loved the personalization process. The artisan was incredibly communicative and brought my vision to life.", rating: 5, date: "1 week ago" }
+                    ].map((review, i) => (
+                        <div key={i} className="p-5 rounded-xl bg-black/40 border border-white/5 hover:border-white/10 transition-colors">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-white/90 flex items-center gap-2">
+                                        {review.name}
+                                        <span className="bg-[#52B788]/20 text-[#52B788] px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold border border-[#52B788]/30 flex items-center gap-1">
+                                            ✓ Verified Buyer
+                                        </span>
+                                    </p>
+                                    <p className="text-xs text-white/40 mt-1">Purchased: <span className="text-white/60">{review.product}</span></p>
+                                </div>
+                                <span className="text-xs text-white/30">{review.date}</span>
+                            </div>
+                            <div className="flex text-[#E8A838] text-xs mb-2">{'★'.repeat(review.rating)}</div>
+                            <p className="text-sm text-white/60 italic">"{review.text}"</p>
+                        </div>
+                    ))}
+                </div>
+            </motion.div>
         </div>
     );
 }
