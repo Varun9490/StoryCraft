@@ -18,9 +18,6 @@
 }
 
 /* ===== BASE STYLES ===== */
-* {
-  cursor: none !important;
-}
 
 html {
   scroll-behavior: smooth;
@@ -33,7 +30,7 @@ body {
   color: var(--color-text-dark);
   font-family: var(--font-inter);
   overflow-x: hidden;
-  cursor: none !important;
+  cursor: none;
 }
 
 /* ===== NOISE TEXTURE OVERLAY ===== */
@@ -297,6 +294,16 @@ body {
 
 .fab-back-top:hover {
   transform: scale(1.1);
+}
+
+/* ===== SCROLLBAR HIDE UTILITY ===== */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* ===== RESPONSIVE ===== */

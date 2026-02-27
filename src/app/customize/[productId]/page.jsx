@@ -4,8 +4,13 @@ import { useEffect, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import CustomizationRequestForm from '@/components/customize/CustomizationRequestForm';
+
+function resolveImageUrl(img) {
+    if (!img) return '';
+    if (typeof img === 'string') return img;
+    return img.url || img.secure_url || '';
+}
 
 export default function CustomizationStudioPage({ params }) {
     const { productId } = use(params);
@@ -110,13 +115,12 @@ export default function CustomizationStudioPage({ params }) {
                 {/* Left — product */}
                 <div className="space-y-4">
                     {product.images?.[0] && (
-                        <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10">
-                            <Image
-                                src={product.images[0]}
+                        <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/[0.08]">
+                            <img
+                                src={resolveImageUrl(product.images[0])}
                                 alt={product.title}
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="w-full h-full object-cover"
+                                loading="lazy"
                             />
                         </div>
                     )}

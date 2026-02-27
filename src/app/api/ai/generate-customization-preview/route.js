@@ -55,8 +55,27 @@ export async function POST(request) {
         }
 
         // Fetch product image as base64
-        const resolvedProductUrl = productImageUrl?.url || (typeof productImageUrl === 'string' ? productImageUrl : '');
+        let resolvedProductUrl = '';
+        if (typeof productImageUrl === 'object' && productImageUrl !== null) {
+            resolvedProductUrl = productImageUrl.url || productImageUrl.secure_url || '';
+        } else if (typeof productImageUrl === 'string') {
+            resolvedProductUrl = productImageUrl;
+        }
+
+        if (!resolvedProductUrl || !resolvedProductUrl.startsWith('http')) {
+            return NextResponse.json(
+                { success: false, error: 'Valid product image URL is required' },
+                { status: 400 }
+            );
+        }
+
         const productImgRes = await fetch(resolvedProductUrl);
+        if (!productImgRes.ok) {
+            return NextResponse.json(
+                { success: false, error: 'Failed to fetch product image. Please try again.' },
+                { status: 422 }
+            );
+        }
         const productBuffer = await productImgRes.arrayBuffer();
         const productBase64 = Buffer.from(productBuffer).toString('base64');
 

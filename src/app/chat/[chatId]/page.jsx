@@ -19,6 +19,7 @@ export default function ChatDetailPage({ params }) {
     const [generatingPreview, setGeneratingPreview] = useState(false);
     const [customizationPrompt, setCustomizationPrompt] = useState('');
     const [generationLoading, setGenerationLoading] = useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = useState(null);
 
     useEffect(() => {
         if (!authLoading && !user) router.push('/login');
@@ -38,6 +39,13 @@ export default function ChatDetailPage({ params }) {
                     if (data.data.chat.customization_description) {
                         setCustomizationPrompt(data.data.chat.customization_description);
                     }
+                    // Find existing preview image from messages
+                    const previewMsg = data.data.chat.messages?.findLast?.(
+                        m => m.message_type === 'aipreview' && m.image_url
+                    );
+                    if (previewMsg) {
+                        setPreviewImageUrl(previewMsg.image_url);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load chat:', err);
@@ -53,7 +61,9 @@ export default function ChatDetailPage({ params }) {
         const cleanupReady = onEvent('preview_ready', ({ chatId: incomingChatId, imageUrl }) => {
             if (incomingChatId === chatId) {
                 setChat((prev) => prev ? { ...prev, customization_status: 'preview_generated' } : prev);
+                setPreviewImageUrl(imageUrl);
                 setGeneratingPreview(false);
+                setGenerationLoading(false);
             }
         });
         const cleanupGenerating = onEvent('preview_generating', ({ chatId: incomingChatId }) => {
@@ -61,9 +71,16 @@ export default function ChatDetailPage({ params }) {
                 setGeneratingPreview(true);
             }
         });
+        const cleanupFailed = onEvent('preview_generation_failed', ({ chatId: incomingChatId }) => {
+            if (incomingChatId === chatId) {
+                setGeneratingPreview(false);
+                setGenerationLoading(false);
+            }
+        });
         return () => {
             cleanupReady?.();
             cleanupGenerating?.();
+            cleanupFailed?.();
         };
     }, [chatId]);
 
@@ -73,7 +90,15 @@ export default function ChatDetailPage({ params }) {
         if (!customizationPrompt.trim() || generationLoading) return;
         setGenerationLoading(true);
         try {
-            const productImage = chat?.product?.images?.[0] || '';
+            // Resolve the product image URL properly
+            const productImages = chat?.product?.images || [];
+            let productImage = '';
+            if (productImages.length > 0) {
+                const firstImg = productImages[0];
+                // Handle case where image is an object with url property, or a plain string
+                productImage = typeof firstImg === 'string' ? firstImg : (firstImg?.url || firstImg?.secure_url || '');
+            }
+
             const res = await fetch('/api/ai/generate-customization-preview', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -87,6 +112,7 @@ export default function ChatDetailPage({ params }) {
             const data = await res.json();
             if (data.success) {
                 setChat((prev) => prev ? { ...prev, customization_status: 'preview_generated' } : prev);
+                setPreviewImageUrl(data.data.imageUrl);
             }
         } catch (err) {
             console.error('Preview generation failed:', err);
@@ -108,48 +134,77 @@ export default function ChatDetailPage({ params }) {
         }
     };
 
+    const handleRequestChanges = async () => {
+        try {
+            await fetch(`/api/chats/${chatId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customization_status: 'requested' }),
+            });
+            setChat((prev) => prev ? { ...prev, customization_status: 'requested' } : prev);
+            setPreviewImageUrl(null);
+        } catch (err) {
+            console.error('Failed to request changes:', err);
+        }
+    };
+
     if (loading || authLoading || !user) {
         return (
-            <div className="h-screen flex items-center justify-center">
-                <span className="w-6 h-6 border-2 border-white/20 border-t-[#C4622D] rounded-full animate-spin" />
+            <div className="h-screen flex items-center justify-center bg-[#050505]">
+                <span className="w-6 h-6 border-2 border-white/10 border-t-[#C4622D] rounded-full animate-spin" />
             </div>
         );
     }
 
     if (!chat) {
         return (
-            <div className="h-screen flex items-center justify-center text-white/40 text-sm">
+            <div className="h-screen flex items-center justify-center text-white/40 text-sm bg-[#050505]">
                 Chat not found
             </div>
         );
     }
 
     return (
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col bg-[#050505]">
             {/* Customization Timeline */}
             {chat.customization_status !== 'none' && (
                 <CustomizationTimeline status={chat.customization_status} />
             )}
 
-            {/* Artisan: Generate Preview button */}
+            {/* Artisan: Generate Preview panel */}
             {chat.customization_status === 'requested' && user?.role === 'artisan' && (
-                <div className="px-4 py-3 bg-[#E8A838]/5 border-b border-[#E8A838]/20">
-                    <p className="text-xs text-[#E8A838] font-medium mb-2">📝 Buyer requested a customization</p>
+                <div className="px-5 py-4 bg-[#E8A838]/[0.04] border-b border-[#E8A838]/15">
+                    <p className="text-xs text-[#E8A838] font-medium mb-2.5 flex items-center gap-1.5">
+                        <span>📝</span> Buyer requested a customization
+                    </p>
                     <textarea
                         value={customizationPrompt}
                         onChange={(e) => setCustomizationPrompt(e.target.value)}
                         rows={2}
-                        placeholder="Describe the customization..."
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/90 placeholder:text-white/25 focus:border-[#8B5CF6] focus:outline-none resize-none mb-2"
+                        placeholder="Describe the customization for AI to generate..."
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-white/90 placeholder:text-white/25 focus:border-[#8B5CF6]/50 focus:outline-none resize-none mb-3 transition-colors"
                     />
                     <button
                         onClick={handleGeneratePreview}
                         disabled={generationLoading || !customizationPrompt.trim()}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all disabled:opacity-30 hover:brightness-110"
-                        style={{ background: '#8B5CF6' }}
+                        className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all disabled:opacity-30 hover:brightness-110 shadow-md"
+                        style={{ background: generationLoading ? '#555' : 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
                     >
                         {generationLoading ? '✦ Generating Preview...' : '✦ Generate AI Preview'}
                     </button>
+                </div>
+            )}
+
+            {/* Preview card for buyer */}
+            {chat.customization_status === 'preview_generated' && previewImageUrl && (
+                <div className="px-4 py-3 border-b border-white/[0.06]">
+                    <CustomizationPreviewCard
+                        imageUrl={previewImageUrl}
+                        chatId={chatId}
+                        userRole={user?.role}
+                        onConfirm={handleConfirmCustomization}
+                        onRequestChanges={handleRequestChanges}
+                    />
                 </div>
             )}
 
@@ -158,7 +213,7 @@ export default function ChatDetailPage({ params }) {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="px-4 py-3 bg-[#8B5CF6]/5 border-b border-[#8B5CF6]/20 text-center"
+                    className="px-4 py-3 bg-[#8B5CF6]/[0.04] border-b border-[#8B5CF6]/15 text-center"
                 >
                     <span className="w-4 h-4 border-2 border-[#8B5CF6]/30 border-t-[#8B5CF6] rounded-full animate-spin inline-block mr-2" />
                     <span className="text-xs text-[#8B5CF6]">Artisan is generating your preview...</span>

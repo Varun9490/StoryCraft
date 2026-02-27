@@ -75,7 +75,7 @@ Guidelines:
     } catch (error) {
         console.error('Chatbot AI Error:', error);
         return NextResponse.json(
-            { success: false, error: 'Sorry, I am having trouble connecting to my creative mind right now.' },
+            { success: false, error: error.message || 'Sorry, I am having trouble connecting to my creative mind right now.' },
             { status: 500 }
         );
     }

@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, memo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useSocket } from '@/hooks/useSocket';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 import ImageMessageUpload from './ImageMessageUpload';
-import Image from 'next/image';
 
-export default function ChatInterface({ chatId, currentUser, otherParticipant, product }) {
+const MemoizedMessageBubble = memo(MessageBubble);
+
+export default function ChatInterface({ chatId, currentUser, otherParticipant, product, onClose }) {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [typingUser, setTypingUser] = useState(null);
@@ -33,7 +34,7 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
                 setIsLoading(false);
             }
         };
-        fetchChat();
+        if (chatId) fetchChat();
     }, [chatId]);
 
     // Socket handlers
@@ -44,9 +45,18 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
         const cleanupMsg = onNewMessage(({ message, chatId: incomingChatId }) => {
             if (incomingChatId === chatId) {
                 setMessages((prev) => {
-                    // Prevent duplicates
-                    if (prev.some((m) => m._id === message._id)) return prev;
-                    return [...prev, message];
+                    // Remove any temp message with same content from same sender (optimistic update)
+                    const withoutTemp = prev.filter((m) => {
+                        if (m._id?.startsWith?.('temp-') &&
+                            m.sender === message.sender?.toString() &&
+                            m.content === message.content) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    // Prevent duplicates by real _id
+                    if (withoutTemp.some((m) => m._id === message._id)) return withoutTemp;
+                    return [...withoutTemp, message];
                 });
             }
         });
@@ -78,7 +88,7 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
 
     const handleSend = useCallback(() => {
         const text = newMessage.trim();
-        if (!text) return;
+        if (!text || !currentUser?._id) return;
 
         sendMessage({
             chatId,
@@ -87,7 +97,7 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
             messageType: 'text',
         });
 
-        // Optimistic add
+        // Optimistic add — will be replaced by socket response
         setMessages((prev) => [
             ...prev,
             {
@@ -102,10 +112,11 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
         setNewMessage('');
         emitTypingStop(chatId, currentUser._id);
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    }, [newMessage, chatId, currentUser?._id]);
+    }, [newMessage, chatId, currentUser?._id, sendMessage, emitTypingStop]);
 
     const handleImageReady = useCallback(
         (imageUrl) => {
+            if (!currentUser?._id) return;
             sendMessage({
                 chatId,
                 senderId: currentUser._id,
@@ -114,20 +125,20 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
                 imageUrl,
             });
         },
-        [chatId, currentUser?._id]
+        [chatId, currentUser?._id, sendMessage]
     );
 
     const handleInputChange = (e) => {
         setNewMessage(e.target.value);
-        // Auto-resize textarea
         e.target.style.height = 'auto';
         e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px';
-        // Typing indicator
-        emitTypingStart(chatId, currentUser._id);
-        clearTimeout(typingTimeout.current);
-        typingTimeout.current = setTimeout(() => {
-            emitTypingStop(chatId, currentUser._id);
-        }, 2000);
+        if (currentUser?._id) {
+            emitTypingStart(chatId, currentUser._id);
+            clearTimeout(typingTimeout.current);
+            typingTimeout.current = setTimeout(() => {
+                emitTypingStop(chatId, currentUser._id);
+            }, 2000);
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -140,21 +151,29 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
-                <div className="w-9 h-9 rounded-full bg-[#C4622D]/20 flex items-center justify-center text-sm font-bold" style={{ color: '#C4622D' }}>
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.08] bg-gradient-to-r from-[#0f0f0f] to-[#141414]">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C4622D] to-[#E8A838] flex items-center justify-center text-sm font-bold text-white shadow-md">
                     {otherParticipant?.name?.[0] || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white/80 truncate">{otherParticipant?.name || 'User'}</p>
+                    <p className="text-sm font-medium text-white/90 truncate">{otherParticipant?.name || 'User'}</p>
                     {product && (
-                        <p className="text-[10px] text-white/30 truncate">Re: {product.title}</p>
+                        <p className="text-[10px] text-white/35 truncate">Re: {product.title}</p>
                     )}
                 </div>
-                <div className="w-2 h-2 rounded-full bg-green-500/70" title="Connected" />
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="w-7 h-7 rounded-full hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white/70 transition-colors text-sm"
+                    >
+                        ✕
+                    </button>
+                )}
+                <div className="w-2 h-2 rounded-full bg-green-500/80 shadow-[0_0_6px_rgba(34,197,94,0.4)]" title="Connected" />
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 scrollbar-hide">
                 {isLoading ? (
                     <div className="space-y-3">
                         {Array.from({ length: 4 }).map((_, i) => (
@@ -166,12 +185,13 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
                     </div>
                 ) : messages.length === 0 ? (
                     <div className="text-center py-12">
-                        <p className="text-white/20 text-sm">Start a conversation</p>
+                        <span className="text-3xl opacity-20 block mb-3">💬</span>
+                        <p className="text-white/25 text-sm">Start a conversation</p>
                     </div>
                 ) : (
-                    <AnimatePresence>
+                    <AnimatePresence initial={false}>
                         {messages.map((msg, i) => (
-                            <MessageBubble
+                            <MemoizedMessageBubble
                                 key={msg._id || `msg-${i}`}
                                 message={msg}
                                 isOwn={msg.sender === currentUser._id || msg.sender?._id === currentUser._id}
@@ -189,7 +209,7 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
             </div>
 
             {/* Input */}
-            <div className="px-4 py-3 border-t border-white/10 bg-white/[0.02]">
+            <div className="px-4 py-3 border-t border-white/[0.08] bg-[#0e0e0e]">
                 <div className="flex items-end gap-2">
                     <ImageMessageUpload onImageReady={handleImageReady} disabled={false} />
                     <textarea
@@ -199,14 +219,14 @@ export default function ChatInterface({ chatId, currentUser, otherParticipant, p
                         onKeyDown={handleKeyDown}
                         placeholder="Type a message..."
                         rows={1}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white/90 placeholder:text-white/25 focus:border-[#C4622D] focus:outline-none resize-none transition-colors"
+                        className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white/90 placeholder:text-white/25 focus:border-[#C4622D]/60 focus:bg-white/[0.06] focus:outline-none resize-none transition-all"
                         style={{ maxHeight: '96px' }}
                     />
                     <button
                         onClick={handleSend}
                         disabled={!newMessage.trim()}
-                        className="p-2.5 rounded-xl text-white transition-all disabled:opacity-30 hover:brightness-110"
-                        style={{ background: newMessage.trim() ? '#C4622D' : '#333' }}
+                        className="p-2.5 rounded-xl text-white transition-all disabled:opacity-20 hover:brightness-110 hover:scale-105 active:scale-95"
+                        style={{ background: newMessage.trim() ? 'linear-gradient(135deg, #C4622D, #E8A838)' : '#222' }}
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M22 2L11 13" />

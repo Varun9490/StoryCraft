@@ -4,8 +4,7 @@ import ToastProvider from "@/components/ui/ToastProvider";
 import { CityProvider } from "@/contexts/CityContext";
 import { CartProvider } from "@/contexts/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
-import GlobalChatbot from "@/components/chat/GlobalChatbot";
-import { SmoothCursor } from "@/registry/magicui/smooth-cursor";
+import ClientProviders from "@/components/ClientProviders";
 
 const playfair = Playfair_Display({
     variable: "--font-playfair",
@@ -63,13 +62,11 @@ export default function RootLayout({ children }) {
                     <CartProvider>
                         {children}
                         <CartDrawer />
-                        <GlobalChatbot />
                     </CartProvider>
                 </CityProvider>
                 <ToastProvider />
-                <SmoothCursor />
+                <ClientProviders />
             </body>
         </html>
     );
 }
-
