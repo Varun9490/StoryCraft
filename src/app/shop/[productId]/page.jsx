@@ -111,7 +111,7 @@ export default function ProductDetailPage({ params }) {
     useEffect(() => {
         const fetchFaqs = async () => {
             try {
-                const res = await fetch(`/api/products/${productId}/faqs`);
+                const res = await fetch(`/api/products/${productId}/faqs`, { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success) {
                     setFaqs(data.data.faqs);
