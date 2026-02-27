@@ -89,7 +89,7 @@ Provide a pricing recommendation. Return ONLY valid JSON in this exact shape:
   "confidence": "<high|medium|low>"
 }
 
-Rules: All percentage fields must sum to 100. suggested_price must be within or near market_range. Return ONLY the JSON object — no markdown, no text.`;
+Rules: All percentage fields must sum to 100. suggested_price must be within or near market_range. Return ONLY the JSON object — no markdown, no text. Ensure any double quotes inside string values are properly escaped (e.g. \\").`;
 
         const model = getFlashModel();
         let parsedResult;
@@ -99,7 +99,7 @@ Rules: All percentage fields must sum to 100. suggested_price must be within or 
             parsedResult = parseAIJson(rawText);
         } catch (firstErr) {
             try {
-                const strictPrompt = pricingPrompt + '\n\nReturn ONLY raw JSON. No markdown. No ```json blocks.';
+                const strictPrompt = pricingPrompt + '\n\nCRITICAL: Return ONLY raw JSON. Do not use Markdown backticks. Escape double quotes inside values properly.';
                 const rawText = await generateWithRetry(model, strictPrompt);
                 parsedResult = parseAIJson(rawText);
             } catch (secondErr) {

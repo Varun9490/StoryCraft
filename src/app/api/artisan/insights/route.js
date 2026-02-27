@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/auth';
-import { getFlashModel, parseAIJson } from '@/lib/gemini';
+import { getFlashModel, parseAIJson, generateWithRetry } from '@/lib/gemini';
 import Artisan from '@/models/Artisan';
 import connectDB from '@/lib/db';
 
@@ -43,12 +43,26 @@ Respond ONLY with valid, minified JSON matching this array structure exactly, wi
     "title": "Another title",
     "description": "More actionable advice."
   }
-]`;
+]
+
+CRITICAL: Do not write anything outside the actual JSON array. Ensure all double quotes inside strings are properly escaped like \\". Do not use markdown \`\`\`json blocks.`;
 
     const model = getFlashModel();
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const insights = parseAIJson(text);
+    let insights = [];
+
+    try {
+      const rawText = await generateWithRetry(model, prompt);
+      insights = parseAIJson(rawText);
+    } catch (e) {
+      try {
+        const strictPrompt = prompt + '\n\nCRITICAL: Return ONLY raw JSON array. DO NOT use markdown. Escape all strings properly.';
+        const rawText = await generateWithRetry(model, strictPrompt);
+        insights = parseAIJson(rawText);
+      } catch (e2) {
+        console.error('Insights JSON Parsing Error:', e2);
+        return NextResponse.json({ success: false, error: 'AI returned invalid response format. Please try again.' }, { status: 422 });
+      }
+    }
 
     return NextResponse.json({ success: true, data: { insights } });
 
