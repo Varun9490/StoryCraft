@@ -11,6 +11,7 @@ function GlobalChatbot() {
         { role: 'assistant', content: 'Namaste! I am Kala, your artisan assistant. How can I help you discover handcrafted art today? ✨' }
     ]);
     const [input, setInput] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
 
@@ -26,11 +27,20 @@ function GlobalChatbot() {
 
     const handleSend = async (e) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() && !selectedImage) return;
 
         const userMsg = input.trim();
+        const imageToSend = selectedImage;
         setInput('');
-        setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+        setSelectedImage(null);
+
+        // Add to UI
+        if (imageToSend) {
+            setMessages((prev) => [...prev, { role: 'user', content: userMsg || 'Uploaded an image', image: imageToSend }]);
+        } else {
+            setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+        }
+
         setIsTyping(true);
 
         try {
@@ -39,7 +49,8 @@ function GlobalChatbot() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: userMsg,
-                    history: messages.slice(1),
+                    image: imageToSend,
+                    history: messages.slice(1).map(m => ({ role: m.role, content: m.content })),
                 }),
             });
 
@@ -120,7 +131,12 @@ function GlobalChatbot() {
                                                 : 'rgba(255,255,255,0.03)',
                                         }}
                                     >
-                                        {msg.content}
+                                        {msg.image && (
+                                            <div className="mb-2 relative h-32 w-48 rounded-lg overflow-hidden border border-white/10">
+                                                <img src={msg.image} alt="Uploaded" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                     </div>
                                 </motion.div>
                             ))}
@@ -141,24 +157,56 @@ function GlobalChatbot() {
                         </div>
 
                         {/* Input */}
-                        <div className="p-4 border-t border-white/[0.05] bg-[#0e0e0e]">
+                        <div className="p-4 border-t border-white/[0.05] bg-[#0e0e0e] flex flex-col gap-2">
+                            {selectedImage && (
+                                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-black/20 self-start ml-2 mb-1 shadow-lg">
+                                    <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedImage(null)}
+                                        className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white/90 text-xs hover:bg-black/90 pb-[1px]"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            )}
                             <form
                                 onSubmit={handleSend}
-                                className="relative flex items-center bg-white/[0.04] border border-white/[0.08] rounded-full p-1 pl-4 focus-within:border-white/[0.15] focus-within:bg-white/[0.06] transition-all"
+                                className="relative flex items-center bg-white/[0.04] border border-white/[0.08] rounded-full p-1 pl-2 focus-within:border-white/[0.15] focus-within:bg-white/[0.06] transition-all gap-1"
                             >
+                                <label className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 cursor-pointer transition-colors text-white/50 hover:text-white shrink-0">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = (e) => setSelectedImage(e.target.result);
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                        <circle cx="9" cy="9" r="2" />
+                                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                    </svg>
+                                </label>
                                 <input
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    placeholder="Ask Kala a question..."
+                                    placeholder={selectedImage ? "Add a message..." : "Ask Kala or upload a photo..."}
                                     className="flex-1 bg-transparent text-white/90 text-sm placeholder:text-white/25 focus:outline-none"
                                 />
                                 <button
                                     type="submit"
-                                    disabled={!input.trim()}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                    disabled={!input.trim() && !selectedImage}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                                     style={{
-                                        background: input.trim()
+                                        background: (input.trim() || selectedImage)
                                             ? 'linear-gradient(135deg, #C4622D, #E8A838)'
                                             : 'rgba(255,255,255,0.06)',
                                     }}

@@ -11,10 +11,10 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Slow down. Too many requests.' }, { status: 429 });
         }
 
-        const { message, history } = await request.json();
+        const { message, image, history } = await request.json();
 
-        if (!message) {
-            return NextResponse.json({ success: false, error: 'Message is required' }, { status: 400 });
+        if (!message && !image) {
+            return NextResponse.json({ success: false, error: 'Message or image is required' }, { status: 400 });
         }
 
         if (!getApiKey()) {
@@ -27,7 +27,7 @@ export async function POST(request) {
         const products = await Product.find({ is_published: true }).select('title price category material').limit(10).lean();
 
         const storeContext = products.map(p =>
-            `- ${p.title} (₹${p.price.toLocaleString('en-IN')}) | Category: ${p.category} | Material: ${p.material || 'N/A'}`
+            `- ID: ${p._id} | Title: ${p.title} | Price: ₹${p.price.toLocaleString('en-IN')} | Category: ${p.category} | Material: ${p.material || 'N/A'}`
         ).join('\n');
 
         const systemPrompt = `You are "Kala", a friendly, knowledgeable, and elegant AI chatbot for "StoryCraft" – a premium e-commerce platform selling traditional handcrafted arts from Visakhapatnam and Hyderabad artisans.
@@ -39,10 +39,12 @@ ${storeContext || 'No specific products available right now, but feel free to di
 
 Guidelines:
 - If a user asks for product suggestions, recommend items from the inventory highlights.
+- If a user provides an image, act as a visual search. Identify the type of craft/product in the image, acknowledge it, and then search our inventory highlights for the closest matching products to suggest.
+- **IMPORTANT**: When you suggest a product from the inventory, provide a clickable link to it like this: <a href="/shop/PRODUCT_ID_HERE" class="text-[#E8A838] underline">Product Title</a>. (I have provided the IDs in the inventory list).
 - Keep your answers concise, ideally 2-4 short sentences. 
 - Use warm emojis occasionally (✨, 🌿, 🏺).
 - If they ask about order logistics, tell them we offer free shipping and trackable orders.
-- Never write markdown tables or complex formatting. Keep it chat-friendly.`;
+- Never write markdown tables or complex formatting. Keep it chat-friendly. Use standard HTML links for products.`;
 
         const genAI = getGenAI();
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -64,7 +66,32 @@ Guidelines:
             },
         });
 
-        const result = await chat.sendMessage(message);
+        let parts = [];
+        if (message) {
+            parts.push({ text: message });
+        }
+        if (image) {
+            try {
+                // Determine mime type and base64 data
+                const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+                if (matches && matches.length === 3) {
+                    parts.push({
+                        inlineData: {
+                            data: matches[2],
+                            mimeType: matches[1]
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Failed to parse base64 image for Gemini', e);
+            }
+        }
+        // If there's no message but we have an image, add a prompt
+        if (!message && parts.length > 0) {
+            parts.unshift({ text: "Please analyze this image and suggest similar products from our inventory." });
+        }
+
+        const result = await chat.sendMessage(parts);
         const responseText = result.response.text();
 
         return NextResponse.json({
