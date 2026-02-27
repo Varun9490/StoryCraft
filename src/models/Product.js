@@ -101,6 +101,25 @@ const ProductSchema = new mongoose.Schema(
             enum: ['none', 'generating', 'ready', 'failed'],
             default: 'none',
         },
+        story_panels: [
+            {
+                heading: { type: String, default: '' },
+                body: { type: String, default: '' },
+                image_url: { type: String, default: '' },
+                layout: { type: String, enum: ['text-left', 'text-right', 'full-image', 'centered'], default: 'text-left' },
+                order: { type: Number, default: 0 },
+            },
+        ],
+        translation_cache: {
+            type: Map,
+            of: String,
+            default: {},
+        },
+        unique_visitors: {
+            type: [String],
+            default: [],
+            select: false,
+        },
     },
     { timestamps: true }
 );

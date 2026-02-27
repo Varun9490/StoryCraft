@@ -119,6 +119,13 @@ export default function ProductListTable({ products: initialProducts }) {
                                 <td className="py-3 px-3">
                                     <div className="flex items-center justify-end gap-1">
                                         <Link
+                                            href={`/dashboard/artisan/products/${product._id}/story`}
+                                            className="p-1.5 rounded-lg text-[#C4622D]/50 hover:text-[#C4622D] hover:bg-[#C4622D]/10 transition-colors"
+                                            title="Story Builder"
+                                        >
+                                            📖
+                                        </Link>
+                                        <Link
                                             href={`/dashboard/artisan/products/${product._id}/faqs`}
                                             className="p-1.5 rounded-lg text-[#8B5CF6]/50 hover:text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-colors"
                                             title="Manage FAQs"

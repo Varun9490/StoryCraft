@@ -8,6 +8,7 @@ const SmoothCursor = dynamic(
     () => import('@/registry/magicui/smooth-cursor').then(mod => ({ default: mod.SmoothCursor })),
     { ssr: false }
 );
+const InstallPrompt = dynamic(() => import('@/components/pwa/InstallPrompt'), { ssr: false });
 
 export default function ClientProviders() {
     return (
@@ -15,6 +16,7 @@ export default function ClientProviders() {
             <ChatPopout />
             <GlobalChatbot />
             <SmoothCursor />
+            <InstallPrompt />
         </>
     );
 }

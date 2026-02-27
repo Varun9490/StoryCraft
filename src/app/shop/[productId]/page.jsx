@@ -1,19 +1,71 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, use, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import InfiniteMenu from '@/components/animations/InfiniteMenu';
 import { useCart } from '@/contexts/CartContext';
 import FAQAccordion from '@/components/shop/FAQAccordion';
+import TranslateToggle from '@/components/shop/TranslateToggle';
 import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useViewTracker } from '@/hooks/useViewTracker';
 import WishlistButton from '@/components/ui/WishlistButton';
+import Head from 'next/head';
 
 const ProductModelViewer = dynamic(() => import('@/components/three/ProductModelViewer'), { ssr: false });
+
+function ProductJsonLd({ product, faqs }) {
+    const artisanName = product.artisan?.user?.name || 'Artisan';
+    const imageUrl = product.images?.[0]?.url || product.images?.[0] || '';
+
+    const productSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.title,
+        description: product.description,
+        image: imageUrl,
+        brand: { '@type': 'Brand', name: 'StoryCraft' },
+        offers: {
+            '@type': 'Offer',
+            price: product.price,
+            priceCurrency: 'INR',
+            availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            seller: { '@type': 'Person', name: artisanName },
+        },
+        category: product.category?.replace('_', ' '),
+        material: product.material || undefined,
+    };
+
+    const faqSchema = faqs.length > 0 ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map(f => ({
+            '@type': 'Question',
+            name: f.question,
+            acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+    } : null;
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+            />
+            {faqSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+                />
+            )}
+        </>
+    );
+}
 
 export default function ProductDetailPage({ params }) {
     const { productId } = use(params);
@@ -22,9 +74,10 @@ export default function ProductDetailPage({ params }) {
     const [quantity, setQuantity] = useState(1);
     const { dispatch } = useCart();
     const [faqs, setFaqs] = useState([]);
-    const [activeTab, setActiveTab] = useState('photos');
     const { user } = useAuth();
+    const { lang, toggleLang, t, loading: translating } = useTranslation(productId);
 
+    useViewTracker(productId);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -40,7 +93,6 @@ export default function ProductDetailPage({ params }) {
         fetchProduct();
     }, [productId]);
 
-    // Fetch approved FAQs
     useEffect(() => {
         const fetchFaqs = async () => {
             try {
@@ -53,6 +105,24 @@ export default function ProductDetailPage({ params }) {
         };
         if (productId) fetchFaqs();
     }, [productId]);
+
+    const translationFields = useMemo(() => {
+        const fields = ['title', 'description'];
+        faqs.forEach((_, i) => fields.push(`faq_${i}`));
+        return fields;
+    }, [faqs]);
+
+    const translatedFaqs = useMemo(() => {
+        if (lang === 'en') return faqs;
+        return faqs.map((faq, i) => {
+            const translated = t(`faq_${i}`, '');
+            if (!translated) return faq;
+            const parts = translated.split('\n');
+            const q = (parts.find(p => p.startsWith('Q:')) || '').replace('Q:', '').trim() || faq.question;
+            const a = (parts.find(p => p.startsWith('A:')) || '').replace('A:', '').trim() || faq.answer;
+            return { ...faq, question: q, answer: a };
+        });
+    }, [lang, faqs, t]);
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -112,12 +182,13 @@ export default function ProductDetailPage({ params }) {
     const artisanName = product.artisan?.user?.name || 'Artisan';
     const artisanId = product.artisan?._id;
     const isOwner = user?.role === 'artisan' && user?.artisanProfile === artisanId?.toString();
+    const hasStory = product.story_panels && product.story_panels.length > 0;
 
     return (
         <main className="min-h-screen bg-[#050505]">
             <Navbar />
+            <ProductJsonLd product={product} faqs={faqs} />
 
-            {/* Full Screen Infinite Menu Hero */}
             <div className="w-full h-[100svh] relative pt-[72px]">
                 <InfiniteMenu
                     items={product.images.map(img => ({
@@ -127,8 +198,6 @@ export default function ProductDetailPage({ params }) {
                     }))}
                     scale={1.2}
                 />
-
-                {/* Scroll Indicator */}
                 <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 animate-bounce">
                     <button
                         onClick={() => window.scrollBy({ top: window.innerHeight - 80, behavior: 'smooth' })}
@@ -137,25 +206,27 @@ export default function ProductDetailPage({ params }) {
                         ↓
                     </button>
                 </div>
-
-                {/* Fade to black gradient transition */}
                 <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none" />
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-16" id="details">
-                {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-xs text-white/30 mb-8">
-                    <Link href="/shop" className="hover:text-white/60 transition-colors">Shop</Link>
-                    <span>/</span>
-                    <span className="text-white/50 capitalize">{product.category?.replace('_', ' ')}</span>
-                    <span>/</span>
-                    <span className="text-white/60 truncate max-w-[200px]">{product.title}</span>
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2 text-xs text-white/30">
+                        <Link href="/shop" className="hover:text-white/60 transition-colors">Shop</Link>
+                        <span>/</span>
+                        <span className="text-white/50 capitalize">{product.category?.replace('_', ' ')}</span>
+                        <span>/</span>
+                        <span className="text-white/60 truncate max-w-[200px]">{product.title}</span>
+                    </div>
+                    <TranslateToggle
+                        lang={lang}
+                        onToggle={() => toggleLang(translationFields)}
+                        loading={translating}
+                    />
                 </div>
 
                 <div className="max-w-3xl mx-auto flex flex-col gap-12">
-                    {/* Info */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-                        {/* Category & City */}
                         <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-white/50 uppercase tracking-wider">
                                 {product.category?.replace('_', ' ')}
@@ -165,17 +236,15 @@ export default function ProductDetailPage({ params }) {
                             </span>
                         </div>
 
-                        {/* Title & Wishlist */}
                         <div className="flex items-start justify-between gap-4">
                             <h1 className="text-3xl md:text-4xl font-bold text-white/90 leading-tight" style={{ fontFamily: 'var(--font-playfair)' }}>
-                                {product.title}
+                                {t('title', product.title)}
                             </h1>
                             <div className="mt-2">
                                 <WishlistButton productId={product._id} size="md" />
                             </div>
                         </div>
 
-                        {/* Artisan */}
                         <Link
                             href={`/artisan/${artisanId}`}
                             className="flex items-center gap-3 group w-fit"
@@ -195,7 +264,6 @@ export default function ProductDetailPage({ params }) {
                             </div>
                         </Link>
 
-                        {/* Price */}
                         <div className="flex items-end gap-3">
                             <span className="text-4xl font-bold" style={{ color: '#C4622D', fontFamily: 'var(--font-playfair)' }}>
                                 ₹{product.price?.toLocaleString('en-IN')}
@@ -203,7 +271,6 @@ export default function ProductDetailPage({ params }) {
                             <span className="text-xs text-white/30 mb-1">Free shipping</span>
                         </div>
 
-                        {/* Stock */}
                         {product.stock > 0 && (
                             <p className={`text-xs ${product.stock <= 5 ? 'text-amber-400/80' : 'text-[#8B5CF6]/90'}`}>
                                 {product.stock <= 5 ? '⚡ Only ' : '📦 '} {product.stock} units available in stock
@@ -213,7 +280,6 @@ export default function ProductDetailPage({ params }) {
                             <p className="text-sm text-red-400">Out of stock</p>
                         )}
 
-                        {/* Quantity & Add to Cart */}
                         {product.stock > 0 && (
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2 bg-white/5 rounded-xl border border-white/10 p-1">
@@ -241,15 +307,22 @@ export default function ProductDetailPage({ params }) {
                             </div>
                         )}
 
-                        {/* Description */}
                         <div className="border-t border-white/10 pt-6">
                             <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">The Story</h3>
                             <p className="text-sm text-white/50 leading-relaxed whitespace-pre-line">
-                                {product.description}
+                                {t('description', product.description)}
                             </p>
                         </div>
 
-                        {/* Details */}
+                        {hasStory && (
+                            <a
+                                href={`/story/${product._id}`}
+                                className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all border border-[#C4622D]/30 text-[#C4622D] hover:bg-[#C4622D]/10"
+                            >
+                                🎬 View Full Cinematic Story
+                            </a>
+                        )}
+
                         <div className="grid grid-cols-2 gap-3">
                             {product.material && (
                                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
@@ -276,7 +349,6 @@ export default function ProductDetailPage({ params }) {
                             )}
                         </div>
 
-                        {/* Chat with Artisan */}
                         {artisanId && (
                             <a
                                 href={`/chat?artisanId=${artisanId}&productId=${product._id}`}
@@ -286,7 +358,6 @@ export default function ProductDetailPage({ params }) {
                             </a>
                         )}
 
-                        {/* Tags */}
                         {product.tags?.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                                 {product.tags.map((tag) => (
@@ -297,15 +368,12 @@ export default function ProductDetailPage({ params }) {
                             </div>
                         )}
 
-                        {/* Views */}
                         <div className="text-xs text-white/20">
                             👁️ {product.views?.toLocaleString()} views
                         </div>
 
-                        {/* FAQ Accordion */}
-                        <FAQAccordion faqs={faqs} productTitle={product.title} />
+                        <FAQAccordion faqs={translatedFaqs} productTitle={product.title} />
 
-                        {/* 3D Model Viewer Optional Block */}
                         {(product.model_3d_url || isOwner) && (
                             <div className="w-full bg-[#0F0F14] rounded-2xl p-6 flex flex-col items-center justify-center min-h-[450px] mt-12 border border-white/5">
                                 {product.model_3d_url && product.model_3d_status === 'ready' ? (
