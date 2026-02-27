@@ -79,7 +79,7 @@ export default function FAQGeneratorTrigger({ productData, onFAQsGenerated, disa
                 className={cn(
                     'w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all',
                     canGenerate && !loading
-                        ? 'bg-[#8B5CF6] text-white hover:brightness-110 cursor-pointer'
+                        ? 'bg-[#8B5CF6] text-white hover:brightness-110 cursor-none'
                         : 'bg-white/10 text-white/30 cursor-not-allowed opacity-50'
                 )}
             >

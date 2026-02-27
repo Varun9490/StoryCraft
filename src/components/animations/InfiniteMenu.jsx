@@ -980,7 +980,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }) {
           bg-[#C4622D]
           border border-white/20 hover:scale-105 active:scale-95
           rounded-full
-          cursor-pointer shadow-2xl
+          cursor-none shadow-2xl
           transition-all
           ${isMoving
                                 ? 'bottom-[-100px] opacity-0 pointer-events-none duration-[100ms] scale-0 -translate-x-1/2'

@@ -191,7 +191,7 @@ export default function ProductGrid() {
                         <motion.div
                             key={product.id}
                             variants={cardVariants}
-                            className="product-card bg-white rounded-2xl overflow-hidden border border-[#E5DDD4] cursor-pointer group"
+                            className="product-card bg-white rounded-2xl overflow-hidden border border-[#E5DDD4] cursor-none group"
                         >
                             {/* Product Image */}
                             <div className="relative aspect-[4/3] overflow-hidden bg-[#F9F6F1]">

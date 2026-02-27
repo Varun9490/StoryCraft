@@ -63,12 +63,12 @@ export default function FilterSidebar({ productCounts = {}, onMobileClose }) {
                     ].map(({ value, label }) => (
                         <label
                             key={label}
-                            className="flex items-center gap-2 cursor-pointer group"
+                            className="flex items-center gap-2 cursor-none group"
                         >
                             <span
                                 className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${currentCity === value
-                                        ? 'border-[#C4622D] bg-[#C4622D]'
-                                        : 'border-white/20 group-hover:border-white/40'
+                                    ? 'border-[#C4622D] bg-[#C4622D]'
+                                    : 'border-white/20 group-hover:border-white/40'
                                     }`}
                             >
                                 {currentCity === value && (
@@ -97,12 +97,12 @@ export default function FilterSidebar({ productCounts = {}, onMobileClose }) {
                     {CATEGORIES.map((cat) => (
                         <label
                             key={cat.id}
-                            className="flex items-center gap-2 cursor-pointer group"
+                            className="flex items-center gap-2 cursor-none group"
                         >
                             <span
                                 className={`w-4 h-4 rounded border flex items-center justify-center transition-colors text-[10px] ${currentCategory === cat.id
-                                        ? 'border-[#C4622D] bg-[#C4622D] text-white'
-                                        : 'border-white/20 text-transparent group-hover:border-white/40'
+                                    ? 'border-[#C4622D] bg-[#C4622D] text-white'
+                                    : 'border-white/20 text-transparent group-hover:border-white/40'
                                     }`}
                             >
                                 ✓
@@ -159,7 +159,7 @@ export default function FilterSidebar({ productCounts = {}, onMobileClose }) {
                 <select
                     value={currentSort}
                     onChange={(e) => updateParam('sort', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#C4622D] focus:outline-none transition-colors appearance-none cursor-pointer"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#C4622D] focus:outline-none transition-colors appearance-none cursor-none"
                     style={{ backgroundImage: 'none' }}
                 >
                     <option value="newest" className="bg-[#0a0a0a]">Newest</option>

@@ -132,7 +132,7 @@ export default function ArtisanPosters() {
                             key={artisan.id}
                             custom={artisan.rotation}
                             variants={posterVariants}
-                            className="poster-card relative bg-[#2a2015] rounded-xl overflow-hidden border border-[#3a3025] group cursor-pointer"
+                            className="poster-card relative bg-[#2a2015] rounded-xl overflow-hidden border border-[#3a3025] group cursor-none"
                             style={{ transform: `rotate(${artisan.rotation}deg)` }}
                         >
                             {/* Portrait */}

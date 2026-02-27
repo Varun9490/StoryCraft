@@ -111,7 +111,7 @@ export default function HowItWorks() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: step.id * 0.15 }}
                             onClick={() => setActiveStep(step.id)}
-                            className={`p-8 rounded-xl border cursor-pointer transition-all duration-500 ${step.id === activeStep
+                            className={`p-8 rounded-xl border cursor-none transition-all duration-500 ${step.id === activeStep
                                 ? "bg-white border-[#C4622D]/30 shadow-xl shadow-[#C4622D]/5 scale-[1.02]"
                                 : "bg-white/50 border-[#E5DDD4] hover:border-[#C4622D]/20"
                                 }`}

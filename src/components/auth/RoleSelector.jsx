@@ -49,7 +49,7 @@ export default function RoleSelector({ selected, onSelect, onNext }) {
                         key={role.id}
                         type="button"
                         onClick={() => onSelect(role.id)}
-                        className="relative p-6 rounded-xl text-left transition-all cursor-pointer border-2"
+                        className="relative p-6 rounded-xl text-left transition-all cursor-none border-2"
                         style={{
                             background: selected === role.id ? 'rgba(196,98,45,0.1)' : 'rgba(255,255,255,0.03)',
                             borderColor: selected === role.id ? '#C4622D' : 'rgba(255,255,255,0.08)',
@@ -105,7 +105,7 @@ export default function RoleSelector({ selected, onSelect, onNext }) {
                 type="button"
                 onClick={onNext}
                 disabled={!selected}
-                className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 cursor-pointer"
+                className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 cursor-none"
                 style={{
                     fontFamily: 'var(--font-inter)',
                     background: selected ? '#C4622D' : 'rgba(255,255,255,0.1)',

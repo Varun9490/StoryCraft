@@ -21,7 +21,7 @@ export default function ChatListItem({ chat, currentUserId }) {
         <Link href={`/chat/${chat._id}`}>
             <motion.div
                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
-                className="flex items-center gap-3 px-4 py-3 border-b border-white/5 cursor-pointer transition-colors"
+                className="flex items-center gap-3 px-4 py-3 border-b border-white/5 cursor-none transition-colors"
             >
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold"

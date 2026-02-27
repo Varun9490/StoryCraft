@@ -104,7 +104,7 @@ export default function ImageUploadZone({ images = [], onChange, maxImages = 6 }
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/15 rounded-2xl p-8 text-center cursor-pointer hover:border-[#C4622D]/40 transition-colors group"
+                className="border-2 border-dashed border-white/15 rounded-2xl p-8 text-center cursor-none hover:border-[#C4622D]/40 transition-colors group"
             >
                 <div className="text-4xl mb-3 opacity-30 group-hover:opacity-50 transition-opacity">📸</div>
                 <p className="text-sm text-white/40 group-hover:text-white/60 transition-colors">

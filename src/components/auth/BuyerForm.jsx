@@ -229,7 +229,7 @@ export default function BuyerForm({ onSuccess, onBack, role = 'buyer', mode = 'r
                     <button
                         type="button"
                         onClick={onBack}
-                        className="flex-1 py-3 rounded-xl text-sm font-medium border cursor-pointer transition-colors"
+                        className="flex-1 py-3 rounded-xl text-sm font-medium border cursor-none transition-colors"
                         style={{
                             fontFamily: 'var(--font-inter)',
                             borderColor: 'rgba(255,255,255,0.15)',
@@ -243,7 +243,7 @@ export default function BuyerForm({ onSuccess, onBack, role = 'buyer', mode = 'r
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 cursor-none"
                     style={{
                         fontFamily: 'var(--font-inter)',
                         background: loading ? 'rgba(196,98,45,0.7)' : '#C4622D',

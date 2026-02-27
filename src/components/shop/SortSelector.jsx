@@ -5,7 +5,7 @@ export default function SortSelector({ value, onChange }) {
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#C4622D] focus:outline-none transition-colors appearance-none cursor-pointer"
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#C4622D] focus:outline-none transition-colors appearance-none cursor-none"
             style={{ backgroundImage: 'none' }}
         >
             <option value="newest" className="bg-[#0a0a0a]">Newest</option>

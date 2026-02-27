@@ -72,7 +72,7 @@ export default function CustomizationRequestForm({ chatId, productId, onSubmit }
                         </button>
                     </div>
                 ) : (
-                    <label className="flex items-center justify-center w-32 h-32 rounded-xl border-2 border-dashed border-white/10 cursor-pointer hover:border-[#E8A838]/30 transition-colors">
+                    <label className="flex items-center justify-center w-32 h-32 rounded-xl border-2 border-dashed border-white/10 cursor-none hover:border-[#E8A838]/30 transition-colors">
                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                         {uploading ? (
                             <span className="w-5 h-5 border-2 border-white/20 border-t-[#E8A838] rounded-full animate-spin" />

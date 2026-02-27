@@ -214,7 +214,7 @@ export default function ProductUploadForm({ existingProduct = null }) {
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${step === i
                                 ? 'bg-[#C4622D] text-white font-semibold'
                                 : i < step
-                                    ? 'bg-white/10 text-white/60 cursor-pointer hover:bg-white/20'
+                                    ? 'bg-white/10 text-white/60 cursor-none hover:bg-white/20'
                                     : 'bg-white/5 text-white/25 cursor-default'
                                 }`}
                         >

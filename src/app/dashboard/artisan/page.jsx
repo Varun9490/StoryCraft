@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,7 +11,9 @@ export default function ArtisanDashboard() {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [insights, setInsights] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [insightsLoading, setInsightsLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
@@ -20,6 +22,14 @@ export default function ArtisanDashboard() {
                     fetch(`/api/products?artisan=me&limit=50&t=${Date.now()}`, { cache: 'no-store' }),
                     fetch(`/api/orders?t=${Date.now()}`, { cache: 'no-store' }),
                 ]);
+
+                // Also kick off insights fetch (don't block the dashboard render for AI)
+                fetch('/api/artisan/insights').then(res => res.json()).then(data => {
+                    if (data.success && data.data?.insights) {
+                        setInsights(data.data.insights);
+                    }
+                    setInsightsLoading(false);
+                }).catch(() => setInsightsLoading(false));
 
                 if (productsRes.ok) {
                     const productsData = await productsRes.json();
@@ -43,6 +53,27 @@ export default function ArtisanDashboard() {
     const totalRevenue = orders
         .filter((o) => o.payment_status === 'paid')
         .reduce((sum, o) => sum + (o.total_amount || 0), 0);
+
+    // Calculate real revenue data for the last 30 days
+    const chartData = useMemo(() => {
+        const days = 30;
+        const rawData = new Array(days).fill(0);
+        const now = new Date();
+        now.setHours(23, 59, 59, 999);
+        const msPerDay = 1000 * 60 * 60 * 24;
+
+        orders.forEach(order => {
+            // Include paid orders or all orders depending on preference, we will include all placed orders here
+            const orderDate = new Date(order.createdAt);
+            const diffDays = Math.floor((now - orderDate) / msPerDay);
+            if (diffDays >= 0 && diffDays < days) {
+                rawData[days - 1 - diffDays] += (order.total_amount || 0);
+            }
+        });
+
+        const maxVal = Math.max(...rawData, 1);
+        return rawData.map(val => (val / maxVal) * 100);
+    }, [orders]);
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-12">
@@ -119,22 +150,26 @@ export default function ArtisanDashboard() {
                 <h2 className="text-xl font-bold text-[#E8A838] mb-1 flex items-center gap-2" style={{ fontFamily: 'var(--font-playfair)' }}>
                     ✨ AI Market Insights & Suggestions
                 </h2>
-                <p className="text-xs text-white/50 mb-6">Personalized opportunities based on your {artisanProfile?.craft_specialty || 'craft'} expertise.</p>
+                <p className="text-xs text-white/50 mb-6">Personalized opportunities generated for Visakhapatnam on {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                    <div className="p-4 rounded-xl bg-black/40 border border-white/5 backdrop-blur-md">
-                        <span className="text-xl mb-3 block">🪔</span>
-                        <h3 className="text-sm font-semibold text-white/90 mb-1">Upcoming Festive Demand: Diwali</h3>
-                        <p className="text-xs text-white/60 leading-relaxed">
-                            Search trends for '{artisanProfile?.craft_specialty || 'traditional'} handcrafted gifts' are projected to spike by 45% next month. Consider creating bundle offers or limited-edition festive pieces.
-                        </p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-black/40 border border-white/5 backdrop-blur-md">
-                        <span className="text-xl mb-3 block">📈</span>
-                        <h3 className="text-sm font-semibold text-white/90 mb-1">High-Converting Category</h3>
-                        <p className="text-xs text-white/60 leading-relaxed">
-                            Buyers are actively looking for customizable items. Adding a "Personalization Available" option to your top 3 products could increase sales conversion by 20%.
-                        </p>
-                    </div>
+                    {insightsLoading ? (
+                        <>
+                            <div className="p-4 rounded-xl bg-black/40 border border-white/5 h-32 animate-pulse" />
+                            <div className="p-4 rounded-xl bg-black/40 border border-white/5 h-32 animate-pulse" />
+                        </>
+                    ) : insights && insights.length > 0 ? (
+                        insights.map((insight, idx) => (
+                            <div key={idx} className="p-4 rounded-xl bg-black/40 border border-white/5 backdrop-blur-md">
+                                <span className="text-xl mb-3 block">{insight.icon || '�'}</span>
+                                <h3 className="text-sm font-semibold text-white/90 mb-1">{insight.title}</h3>
+                                <p className="text-xs text-white/60 leading-relaxed">{insight.description}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-1 md:col-span-2 p-4 rounded-xl bg-black/40 border border-white/5 text-sm text-white/60">
+                            Check back later for newly generated market trends!
+                        </div>
+                    )}
                 </div>
             </motion.div>
 
@@ -178,17 +213,17 @@ export default function ArtisanDashboard() {
                 <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/[0.02] p-6 flex flex-col justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-white/80 mb-1" style={{ fontFamily: 'var(--font-playfair)' }}>Store Performance Overview</h2>
-                        <p className="text-[11px] text-white/40 mb-6">Views and engagement over the last 30 days</p>
+                        <p className="text-[11px] text-white/40 mb-6">Daily revenue tracked over the last 30 days</p>
                     </div>
-                    {/* Mocked Graph UI */}
-                    <div className="flex items-end gap-2 h-40 w-full border-b border-white/10 pb-2">
-                        {[40, 60, 30, 80, 50, 90, 70, 100, 60, 40].map((h, i) => (
+                    {/* Real Data Graph UI */}
+                    <div className="flex items-end gap-1 h-40 w-full border-b border-white/10 pb-2">
+                        {chartData.map((h, i) => (
                             <motion.div
                                 key={i}
                                 initial={{ height: 0 }}
-                                animate={{ height: `${h}%` }}
-                                transition={{ duration: 0.8, delay: i * 0.05 }}
-                                className="flex-1 bg-gradient-to-t from-[#C4622D]/40 to-[#C4622D]/80 rounded-t-sm"
+                                animate={{ height: `${Math.max(h, 2)}%` }} // Base min height of 2% just for visual presence
+                                transition={{ duration: 0.8, delay: i * 0.02 }}
+                                className={`flex-1 rounded-t-sm transition-colors ${h > 0 ? "bg-gradient-to-t from-[#C4622D]/40 to-[#C4622D]/80" : "bg-white/5"}`}
                             />
                         ))}
                     </div>

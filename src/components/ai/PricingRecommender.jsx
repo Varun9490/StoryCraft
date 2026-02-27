@@ -58,7 +58,7 @@ export default function PricingRecommender({ productData, onPriceApply }) {
                         'w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border',
                         loading
                             ? 'bg-white/5 border-white/10 text-white/30 cursor-wait'
-                            : 'bg-transparent border-[#E8A838]/40 text-[#E8A838] hover:bg-[#E8A838]/5 cursor-pointer'
+                            : 'bg-transparent border-[#E8A838]/40 text-[#E8A838] hover:bg-[#E8A838]/5 cursor-none'
                     )}
                 >
                     {loading ? (
