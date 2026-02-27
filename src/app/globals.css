@@ -32,14 +32,7 @@ body {
   overflow-x: hidden;
 }
 
-@media (pointer: fine) {
 
-  *,
-  *::before,
-  *::after {
-    cursor: none !important;
-  }
-}
 
 /* ===== NOISE TEXTURE OVERLAY ===== */
 .noise-overlay {

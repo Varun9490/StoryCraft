@@ -108,10 +108,13 @@ export default function StoryEditorPage({ params }) {
         );
     }
 
-    if (!user || user.role !== 'artisan') {
-        router.push('/login');
-        return null;
-    }
+    useEffect(() => {
+        if (!authLoading && (!user || user.role !== 'artisan')) {
+            router.push('/login');
+        }
+    }, [user, authLoading, router]);
+
+    if (!user || user.role !== 'artisan') return null;
 
     return (
         <main className="min-h-screen bg-[#050505]">

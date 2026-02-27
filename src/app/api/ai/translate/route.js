@@ -67,12 +67,13 @@ ${numberedTexts}`;
             const model = getFlashModel();
             const rawText = await generateWithRetry(model, prompt);
 
-            const blocks = rawText.split(/\[(\d+)\]/).filter(Boolean);
+            const regex = /\[(\d+)\]\s*([\s\S]*?)(?=\[\d+\]|$)/g;
+            const matches = [...rawText.matchAll(regex)];
             const cacheUpdates = {};
 
-            for (let i = 0; i < blocks.length - 1; i += 2) {
-                const idx = parseInt(blocks[i]);
-                const translated = blocks[i + 1].trim();
+            for (const match of matches) {
+                const idx = parseInt(match[1]);
+                const translated = match[2].trim();
                 if (idx >= 0 && idx < entries.length) {
                     const fieldKey = entries[idx][0];
                     translations[fieldKey] = translated;

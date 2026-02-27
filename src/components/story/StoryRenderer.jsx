@@ -69,7 +69,8 @@ function StoryPanel({ panel, index, total }) {
                             className="w-full h-full object-cover"
                             variants={clipReveal}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/50 to-[#050505]/20" />
                     </motion.div>
@@ -79,7 +80,8 @@ function StoryPanel({ panel, index, total }) {
                         <motion.h2
                             variants={textUp(0.2)}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
                             className="text-5xl md:text-8xl font-bold text-white leading-[0.95] mb-8"
                             style={{ fontFamily: 'var(--font-playfair)' }}
                         >
@@ -90,7 +92,8 @@ function StoryPanel({ panel, index, total }) {
                         <motion.p
                             variants={textUp(0.45)}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
                             className="text-base md:text-xl text-white/60 leading-relaxed max-w-2xl mx-auto"
                         >
                             {panel.body}
@@ -111,7 +114,8 @@ function StoryPanel({ panel, index, total }) {
                         <motion.h2
                             variants={textUp(0)}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
                             className="text-4xl md:text-7xl font-bold text-white/90 leading-[1.0]"
                             style={{ fontFamily: 'var(--font-playfair)' }}
                         >
@@ -122,7 +126,8 @@ function StoryPanel({ panel, index, total }) {
                         <motion.div
                             variants={clipReveal}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
                             className="rounded-2xl overflow-hidden border border-white/5 mx-auto max-w-3xl"
                         >
                             <motion.img
@@ -137,13 +142,14 @@ function StoryPanel({ panel, index, total }) {
                         <motion.p
                             variants={textUp(0.3)}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
                             className="text-base md:text-lg text-white/50 leading-relaxed max-w-xl mx-auto"
                         >
                             {panel.body}
                         </motion.p>
                     )}
-                    <motion.div variants={lineGrow} initial="hidden" animate={isInView ? 'visible' : 'hidden'} className="w-24 h-[1px] bg-[#C4622D] mx-auto" />
+                    <motion.div variants={lineGrow} initial="hidden" whileInView="visible" viewport={{ once: false, margin: "-10%" }} className="w-24 h-[1px] bg-[#C4622D] mx-auto" />
                 </div>
             </section>
         );
@@ -153,17 +159,19 @@ function StoryPanel({ panel, index, total }) {
     const isRight = panel.layout === 'text-right';
 
     return (
-        <section ref={ref} className="relative min-h-screen flex items-center px-6 md:px-20 py-20 overflow-hidden">
+        <section ref={ref} className="relative min-h-screen flex flex-col md:flex-row overflow-hidden bg-[#0A0503]">
             <PanelCounter index={index} total={total} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 max-w-7xl mx-auto w-full">
-                {/* text column */}
-                <div className={`flex flex-col justify-center space-y-7 ${isRight ? 'md:order-2' : ''}`}>
+
+            {/* text column */}
+            <div className={`w-full md:w-1/2 flex items-center justify-center p-12 md:p-24 ${isRight ? 'md:order-2' : 'md:order-1'}`}>
+                <div className="max-w-xl w-full flex flex-col justify-center space-y-8">
                     {panel.heading && (
                         <motion.h2
                             variants={textUp(0)}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
-                            className="text-3xl md:text-5xl font-bold text-white/90 leading-tight"
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
+                            className="text-4xl md:text-5xl font-bold text-white/90 leading-[1.15]"
                             style={{ fontFamily: 'var(--font-playfair)' }}
                         >
                             {panel.heading}
@@ -173,27 +181,37 @@ function StoryPanel({ panel, index, total }) {
                         <motion.p
                             variants={textUp(0.2)}
                             initial="hidden"
-                            animate={isInView ? 'visible' : 'hidden'}
-                            className="text-base md:text-lg text-white/50 leading-relaxed"
+                            whileInView="visible"
+                            viewport={{ once: false, margin: "-10%" }}
+                            className="text-lg md:text-xl text-white/50 leading-relaxed"
                         >
                             {panel.body}
                         </motion.p>
                     )}
-                    <motion.div variants={lineGrow} initial="hidden" animate={isInView ? 'visible' : 'hidden'} className="w-20 h-[2px] bg-[#C4622D]" />
+                    <motion.div
+                        variants={lineGrow}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: false, margin: "-10%" }}
+                        className="w-20 h-[2px] bg-[#C4622D]"
+                    />
                 </div>
+            </div>
 
-                {/* image column */}
+            {/* image column */}
+            <div className={`w-full md:w-1/2 h-[50vh] md:h-screen relative ${isRight ? 'md:order-1' : 'md:order-2'}`}>
                 {panel.image_url && (
                     <motion.div
                         variants={clipReveal}
                         initial="hidden"
-                        animate={isInView ? 'visible' : 'hidden'}
-                        className={`rounded-2xl overflow-hidden border border-white/5 ${isRight ? 'md:order-1' : ''}`}
+                        whileInView="visible"
+                        viewport={{ once: false, margin: "-10%" }}
+                        className="absolute inset-0 overflow-hidden"
                     >
                         <motion.img
                             src={panel.image_url}
                             alt={panel.heading}
-                            className="w-full h-full object-cover min-h-[450px]"
+                            className="w-full h-full object-cover"
                             style={{ y: imgY, scale: imgScale }}
                         />
                     </motion.div>
