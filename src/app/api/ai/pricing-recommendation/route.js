@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
-import { verifyJWT } from '@/lib/auth';
+import { verifyJWT, verifyRefreshToken, signAccessToken, setAuthCookie } from '@/lib/auth';
+import User from '@/models/User';
 import { getFlashModel, generateWithRetry, parseAIJson, getApiKey } from '@/lib/gemini';
 import { scrapeCompetitorPrices, extractPricesFromResults } from '@/lib/serper';
 import { getCachedPricing, setCachedPricing, buildCacheKey } from '@/lib/pricing-cache';
@@ -19,10 +20,32 @@ export async function POST(request) {
 
         await connectDB();
 
-        const token = request.cookies.get('auth_token')?.value;
-        if (!token) return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
-        const decoded = verifyJWT(token);
-        if (!decoded) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
+        let token = request.cookies.get('auth_token')?.value;
+        let decoded = token ? verifyJWT(token) : null;
+        let newAccessToken = null;
+
+        if (!decoded) {
+            console.warn('[Pricing AI] Primary token invalid or expired. Attempting refresh...');
+            const refreshToken = request.cookies.get('refreshToken')?.value;
+            if (!refreshToken) {
+                console.error('[Pricing AI] No refresh token available.');
+                return NextResponse.json({ success: false, error: 'Session expired. Please log in again.' }, { status: 401 });
+            }
+            const refreshDecoded = verifyRefreshToken(refreshToken);
+            if (!refreshDecoded) {
+                console.error('[Pricing AI] Refresh token invalid or expired.');
+                return NextResponse.json({ success: false, error: 'Session expired. Please log in again.' }, { status: 401 });
+            }
+            const user = await User.findById(refreshDecoded.userId).select('role');
+            if (!user) {
+                console.error('[Pricing AI] User not found during refresh.');
+                return NextResponse.json({ success: false, error: 'User account not found.' }, { status: 401 });
+            }
+            decoded = { userId: user._id.toString(), role: user.role };
+            newAccessToken = signAccessToken(decoded);
+            console.log('[Pricing AI] Successfully transparently refreshed session token!');
+        }
+
         if (decoded.role !== 'artisan') {
             return NextResponse.json({ success: false, error: 'Only artisans can access pricing insights' }, { status: 403 });
         }
@@ -98,11 +121,13 @@ Rules: All percentage fields must sum to 100. suggested_price must be within or 
             const rawText = await generateWithRetry(model, pricingPrompt);
             parsedResult = parseAIJson(rawText);
         } catch (firstErr) {
+            console.error('Pricing AI First Parse Error:', firstErr.message);
             try {
                 const strictPrompt = pricingPrompt + '\n\nCRITICAL: Return ONLY raw JSON. Do not use Markdown backticks. Escape double quotes inside values properly.';
                 const rawText = await generateWithRetry(model, strictPrompt);
                 parsedResult = parseAIJson(rawText);
             } catch (secondErr) {
+                console.error('Pricing AI Second Parse Error:', secondErr.message);
                 return NextResponse.json(
                     { success: false, error: 'Pricing data unavailable. Enter your price based on material cost + labor.' },
                     { status: 422 }
@@ -110,20 +135,20 @@ Rules: All percentage fields must sum to 100. suggested_price must be within or 
             }
         }
 
-        // Validate shape
+        // Validate shape safely
         if (
-            !parsedResult?.market_range?.min ||
-            !parsedResult?.market_range?.max ||
-            !parsedResult?.suggested_price ||
-            !parsedResult?.margin_breakdown
+            parsedResult?.suggested_price === undefined ||
+            !parsedResult?.margin_breakdown ||
+            parsedResult?.market_range?.min === undefined
         ) {
+            console.error('Pricing AI Invalid Shape:', JSON.stringify(parsedResult));
             return NextResponse.json(
                 { success: false, error: 'AI returned incomplete pricing data. Please try again.' },
                 { status: 422 }
             );
         }
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             data: {
                 pricing: parsedResult,
@@ -131,6 +156,12 @@ Rules: All percentage fields must sum to 100. suggested_price must be within or 
                 from_cache: fromCache,
             },
         });
+
+        if (newAccessToken) {
+            setAuthCookie(response, newAccessToken);
+        }
+
+        return response;
     } catch (error) {
         console.error('Pricing recommendation error:', error);
         return NextResponse.json(

@@ -65,16 +65,15 @@ export async function generateWithRetry(model, prompt, maxRetries = 1) {
 
 export function parseAIJson(rawText) {
     let cleaned = rawText.trim();
-    // Strip markdown fenced code blocks
-    const fenceMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
-    if (fenceMatch) {
-        cleaned = fenceMatch[1].trim();
-    }
+
+    // Replace unclosed backticks if any
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '');
+    cleaned = cleaned.replace(/\s*```$/i, '');
 
     try {
         return JSON.parse(cleaned);
     } catch (e) {
-        // If parsing fails, try to extract just the first {...} or [...] block
+        // If parsing fails, cleanly extract the first {...} or [...] block
         const startBracket = cleaned.indexOf('[');
         const startBrace = cleaned.indexOf('{');
 
@@ -95,7 +94,8 @@ export function parseAIJson(rawText) {
                 try {
                     return JSON.parse(subStr);
                 } catch (e2) {
-                    throw e; // throw original
+                    console.error('Inner JSON parse failed on:', subStr);
+                    throw e2; // throw the actual reason why the substring failed
                 }
             }
         }

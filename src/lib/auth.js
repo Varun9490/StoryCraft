@@ -13,7 +13,10 @@ export const signJWT = signAccessToken;
 export function verifyJWT(token) {
     try {
         return jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
+    } catch (err) {
+        if (err.name !== 'TokenExpiredError') {
+            console.warn('[auth] JWT verification failed:', err.message);
+        }
         return null;
     }
 }
@@ -28,7 +31,8 @@ export function signRefreshToken(payload) {
 export function verifyRefreshToken(token) {
     try {
         return jwt.verify(token, process.env.JWT_SECRET + '_refresh');
-    } catch {
+    } catch (err) {
+        console.warn('[auth] RefreshToken verification failed:', err.message);
         return null;
     }
 }
