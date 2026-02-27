@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 const publicNavItems = [
     { label: "Story", href: "/#story" },
@@ -18,6 +19,7 @@ export default function Navbar({ accountMode = false }) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const { scrollY } = useScroll();
     const { user, loading, logout } = useAuth();
+    const router = useRouter();
 
     const navItems = user
         ? [
@@ -82,7 +84,7 @@ export default function Navbar({ accountMode = false }) {
                     </a>
                 ) : (
                     <button
-                        onClick={() => setMobileOpen(!mobileOpen)}
+                        onClick={() => router.back()}
                         className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
                     >
                         <span className="text-xl">←</span>
