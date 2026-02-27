@@ -25,7 +25,7 @@ export function rateLimit({ windowMs = 60000, max = 30, identifier = 'default' }
 
 // Pre-configured limiters for different route types
 export const apiLimiter = rateLimit({ windowMs: 60000, max: 60, identifier: 'api' });
-export const authLimiter = rateLimit({ windowMs: 900000, max: 10, identifier: 'auth' });
+export const authLimiter = rateLimit({ windowMs: 900000, max: 50, identifier: 'auth' });
 export const uploadLimiter = rateLimit({ windowMs: 60000, max: 10, identifier: 'upload' });
 export const aiLimiter = rateLimit({ windowMs: 60000, max: 5, identifier: 'ai' });
 

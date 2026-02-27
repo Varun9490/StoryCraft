@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
+let globalRefreshPromise = null;
+let globalMePromise = null;
+
 export function useAuth() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -11,14 +14,18 @@ export function useAuth() {
     const refreshTimer = useRef(null);
 
     const refreshSession = useCallback(async () => {
-        try {
-            const res = await fetch('/api/auth/refresh', { method: 'POST' });
-            const data = await res.json();
-            if (data.success) {
-                setUser(data.data.user);
-                return true;
-            }
-        } catch { }
+        if (!globalRefreshPromise) {
+            globalRefreshPromise = fetch('/api/auth/refresh', { method: 'POST' })
+                .then(res => res.json())
+                .catch(() => null)
+                .finally(() => { globalRefreshPromise = null; });
+        }
+
+        const data = await globalRefreshPromise;
+        if (data?.success) {
+            setUser(data.data.user);
+            return true;
+        }
         return false;
     }, []);
 
@@ -35,13 +42,18 @@ export function useAuth() {
     useEffect(() => {
         async function fetchUser() {
             try {
-                const res = await fetch('/api/auth/me');
-                const data = await res.json();
-                if (data.success) {
+                if (!globalMePromise) {
+                    globalMePromise = fetch('/api/auth/me')
+                        .then(res => res.json())
+                        .finally(() => { globalMePromise = null; });
+                }
+                const data = await globalMePromise;
+
+                if (data?.success) {
                     setUser(data.data.user);
                 } else {
                     const refreshed = await refreshSession();
-                    if (!refreshed) setError(data.error);
+                    if (!refreshed) setError(data?.error);
                 }
             } catch (err) {
                 setError('Failed to fetch user');
