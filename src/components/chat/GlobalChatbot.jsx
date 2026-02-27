@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 function GlobalChatbot() {
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { role: 'assistant', content: 'Namaste! I am Kala, your artisan assistant. How can I help you discover handcrafted art today? ✨' }
@@ -19,6 +21,8 @@ function GlobalChatbot() {
     useEffect(() => {
         scrollToBottom();
     }, [messages, isTyping]);
+
+    if (pathname?.startsWith('/story/')) return null;
 
     const handleSend = async (e) => {
         e.preventDefault();

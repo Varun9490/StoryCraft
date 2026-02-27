@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback, use, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StoryRenderer from '@/components/story/StoryRenderer';
+import { useTranslation } from '@/hooks/useTranslation';
+import TranslateToggle from '@/components/shop/TranslateToggle';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function StoryViewerPage({ params }) {
     const { productId } = use(params);
@@ -10,7 +13,30 @@ export default function StoryViewerPage({ params }) {
     const [loading, setLoading] = useState(true);
     const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [storyEnded, setStoryEnded] = useState(false);
+    const [controlsVisible, setControlsVisible] = useState(false);
+    const { lang, toggleLang, t, loading: translating } = useTranslation(productId);
+    const { user } = useAuth();
+
+    const isOwner = user?.role === 'artisan';
+
+    const translationFields = useMemo(() => {
+        const fields = ['title'];
+        product?.story_panels?.forEach((_, i) => fields.push(`story_${i}`));
+        return fields;
+    }, [product]);
+
+    const translatedPanels = useMemo(() => {
+        if (!product?.story_panels) return [];
+        if (lang === 'en') return product.story_panels;
+        return product.story_panels.map((panel, i) => {
+            const translated = t(`story_${i}`, '');
+            if (!translated) return panel;
+            const parts = translated.split('\n');
+            const h = (parts[0] || '').trim() || panel.heading;
+            const b = (parts.slice(1).join('\n') || '').trim() || panel.body;
+            return { ...panel, heading: h, body: b };
+        });
+    }, [lang, product, t]);
 
     useEffect(() => {
         const load = async () => {
@@ -42,7 +68,6 @@ export default function StoryViewerPage({ params }) {
             else if (document.msExitFullscreen) await document.msExitFullscreen();
             setIsFullscreen(false);
         } catch { }
-        setStoryEnded(false);
     }, []);
 
     const skipFullscreen = () => {
@@ -62,18 +87,22 @@ export default function StoryViewerPage({ params }) {
         };
     }, []);
 
+    /* Show controls on mouse move, auto-hide after 3s */
     useEffect(() => {
-        if (!product?.story_panels?.length) return;
-        const onScroll = () => {
-            const scrolled = window.scrollY + window.innerHeight;
-            const total = document.documentElement.scrollHeight;
-            if (total - scrolled < 100 && isFullscreen && !storyEnded) {
-                setStoryEnded(true);
-            }
+        let timer;
+        const show = () => {
+            setControlsVisible(true);
+            clearTimeout(timer);
+            timer = setTimeout(() => setControlsVisible(false), 3000);
         };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
-    }, [product, isFullscreen, storyEnded]);
+        window.addEventListener('mousemove', show, { passive: true });
+        window.addEventListener('touchstart', show, { passive: true });
+        return () => {
+            window.removeEventListener('mousemove', show);
+            window.removeEventListener('touchstart', show);
+            clearTimeout(timer);
+        };
+    }, []);
 
     if (loading) {
         return (
@@ -96,6 +125,7 @@ export default function StoryViewerPage({ params }) {
 
     return (
         <div className="relative">
+            {/* Fullscreen prompt */}
             <AnimatePresence>
                 {showFullscreenPrompt && (
                     <motion.div
@@ -139,43 +169,30 @@ export default function StoryViewerPage({ params }) {
                 )}
             </AnimatePresence>
 
-            <AnimatePresence>
-                {storyEnded && isFullscreen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 bg-[#050505]/90 backdrop-blur-md flex items-center justify-center"
+            {/* Story content */}
+            <StoryRenderer panels={translatedPanels} productTitle={t('title', product.title)} />
+
+            {/* Floating controls — only visible on mouse move, auto-hide after 3s */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: controlsVisible ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed top-6 right-6 z-40 flex items-center gap-2"
+                style={{ pointerEvents: controlsVisible ? 'auto' : 'none' }}
+            >
+                <TranslateToggle
+                    lang={lang}
+                    onToggle={() => toggleLang(translationFields)}
+                    loading={translating}
+                />
+                {isOwner && (
+                    <a
+                        href={`/dashboard/artisan/products/${productId}/story`}
+                        className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white/40 text-xs hover:text-white/70 transition-colors"
                     >
-                        <motion.div
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            className="text-center max-w-sm px-6"
-                        >
-                            <p className="text-white/60 mb-6" style={{ fontFamily: 'var(--font-playfair)' }}>Story Complete</p>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={exitFullscreen}
-                                    className="flex-1 py-3 rounded-xl font-semibold text-white text-sm transition-all hover:brightness-110"
-                                    style={{ background: '#C4622D' }}
-                                >
-                                    Exit Fullscreen
-                                </button>
-                                <a
-                                    href={`/shop/${productId}`}
-                                    className="flex-1 py-3 rounded-xl text-sm border border-white/10 text-white/60 hover:bg-white/5 transition-colors text-center font-medium"
-                                >
-                                    View Product
-                                </a>
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                        ✏️ Edit
+                    </a>
                 )}
-            </AnimatePresence>
-
-            <StoryRenderer panels={product.story_panels} productTitle={product.title} />
-
-            <div className="fixed top-6 right-6 z-40 flex items-center gap-3">
                 {isFullscreen && (
                     <button
                         onClick={exitFullscreen}
@@ -190,7 +207,7 @@ export default function StoryViewerPage({ params }) {
                 >
                     ← Product
                 </a>
-            </div>
+            </motion.div>
         </div>
     );
 }

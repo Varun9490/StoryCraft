@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 
 const ChatPopout = dynamic(() => import('@/components/chat/ChatPopout'), { ssr: false });
 const GlobalChatbot = dynamic(() => import('@/components/chat/GlobalChatbot'), { ssr: false });
@@ -11,11 +12,14 @@ const SmoothCursor = dynamic(
 const InstallPrompt = dynamic(() => import('@/components/pwa/InstallPrompt'), { ssr: false });
 
 export default function ClientProviders() {
+    const pathname = usePathname();
+    const isStory = pathname?.startsWith('/story/');
+
     return (
         <>
-            <ChatPopout />
-            <GlobalChatbot />
-            <SmoothCursor />
+            {!isStory && <ChatPopout />}
+            {!isStory && <GlobalChatbot />}
+            {!isStory && <SmoothCursor />}
             <InstallPrompt />
         </>
     );

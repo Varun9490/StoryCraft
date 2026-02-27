@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import ChatList from './ChatList';
 import ChatInterface from './ChatInterface';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,12 +20,15 @@ const PANEL_VARIANTS = {
 };
 
 function ChatPopout() {
+    const pathname = usePathname();
     const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [activeChat, setActiveChat] = useState(null);
     const [chatData, setChatData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+
+    if (pathname?.startsWith('/story/')) return null;
 
     // Open a specific chat
     const openChat = useCallback(async (chatId) => {
@@ -273,12 +277,12 @@ function ChatPopoutList({ currentUserId, onChatSelect }) {
                             )}
                             {chat.customization_status && chat.customization_status !== 'none' && (
                                 <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${chat.customization_status === 'requested'
-                                        ? 'bg-[#E8A838]/10 border-[#E8A838]/20 text-[#E8A838]'
-                                        : chat.customization_status === 'preview_generated'
-                                            ? 'bg-[#8B5CF6]/10 border-[#8B5CF6]/20 text-[#8B5CF6]'
-                                            : chat.customization_status === 'confirmed'
-                                                ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                                                : 'bg-white/5 border-white/10 text-white/30'
+                                    ? 'bg-[#E8A838]/10 border-[#E8A838]/20 text-[#E8A838]'
+                                    : chat.customization_status === 'preview_generated'
+                                        ? 'bg-[#8B5CF6]/10 border-[#8B5CF6]/20 text-[#8B5CF6]'
+                                        : chat.customization_status === 'confirmed'
+                                            ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                                            : 'bg-white/5 border-white/10 text-white/30'
                                     }`}>
                                     {chat.customization_status === 'requested' ? '⏳'
                                         : chat.customization_status === 'preview_generated' ? '✦'

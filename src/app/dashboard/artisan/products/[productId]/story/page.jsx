@@ -58,6 +58,28 @@ export default function StoryEditorPage({ params }) {
         setPanels(newPanels.map((p, i) => ({ ...p, order: i })));
     };
 
+    const handleImageUpload = async (idx, file) => {
+        if (!file) return;
+        const toastId = toast.loading('Uploading image...');
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await res.json();
+            if (data.success) {
+                updatePanel(idx, 'image_url', data.data.url);
+                toast.success('Image uploaded', { id: toastId });
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (err) {
+            toast.error(err.message || 'Upload failed', { id: toastId });
+        }
+    };
+
     const save = async () => {
         setSaving(true);
         try {
@@ -155,26 +177,55 @@ export default function StoryEditorPage({ params }) {
                                 className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#C4622D]/40 resize-none"
                             />
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <input
-                                    value={panel.image_url}
-                                    onChange={e => updatePanel(idx, 'image_url', e.target.value)}
-                                    placeholder="Image URL (Cloudinary)"
-                                    className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#C4622D]/40"
-                                />
+                            <div className="space-y-3">
+                                <div className="flex gap-3 items-center">
+                                    <input
+                                        value={panel.image_url}
+                                        onChange={e => updatePanel(idx, 'image_url', e.target.value)}
+                                        placeholder="Image URL or upload →"
+                                        className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#C4622D]/40"
+                                    />
+                                    <label className="px-4 py-2.5 rounded-xl text-xs font-semibold text-white transition-all hover:brightness-110 flex-shrink-0" style={{ background: '#C4622D' }}>
+                                        📷 Upload
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={e => handleImageUpload(idx, e.target.files?.[0])}
+                                        />
+                                    </label>
+                                </div>
+
                                 <select
                                     value={panel.layout}
                                     onChange={e => updatePanel(idx, 'layout', e.target.value)}
-                                    className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm focus:outline-none focus:border-[#C4622D]/40"
                                 >
                                     {LAYOUTS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                                 </select>
                             </div>
 
-                            {panel.image_url && (
-                                <div className="rounded-xl overflow-hidden border border-white/5 h-40">
+                            {panel.image_url ? (
+                                <div className="rounded-xl overflow-hidden border border-white/5 h-40 relative group">
                                     <img src={panel.image_url} alt="" className="w-full h-full object-cover" />
+                                    <button
+                                        onClick={() => updatePanel(idx, 'image_url', '')}
+                                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 text-white/50 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 h-32 hover:border-[#C4622D]/30 transition-colors">
+                                    <span className="text-white/20 text-2xl mb-2">📷</span>
+                                    <span className="text-white/20 text-xs">Click to upload or paste URL above</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={e => handleImageUpload(idx, e.target.files?.[0])}
+                                    />
+                                </label>
                             )}
                         </motion.div>
                     ))}
