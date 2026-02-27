@@ -78,16 +78,20 @@ export default function DashboardLayout({ children }) {
 
                                 <div className="hidden sm:flex items-center gap-3">
                                     {/* Avatar */}
-                                    <div
-                                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                                        style={{
-                                            background: user.role === 'artisan'
-                                                ? 'linear-gradient(135deg, #C4622D, #E8A838)'
-                                                : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                                        }}
-                                    >
-                                        {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                                    </div>
+                                    {user.avatar ? (
+                                        <img src={user.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover border-2 border-white/10" />
+                                    ) : (
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white border-2 border-white/10"
+                                            style={{
+                                                background: user.role === 'artisan'
+                                                    ? 'linear-gradient(135deg, #C4622D, #E8A838)'
+                                                    : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                                            }}
+                                        >
+                                            {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                                        </div>
+                                    )}
                                     <div>
                                         <p
                                             className="text-sm text-white font-medium leading-tight"

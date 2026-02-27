@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import Navbar from '@/components/Navbar';
 
 const LAYOUTS = [
     { value: 'text-left', label: 'Text Left' },
@@ -100,7 +99,6 @@ export default function StoryEditorPage({ params }) {
     if (authLoading || loading) {
         return (
             <main className="min-h-screen bg-[#050505]">
-                <Navbar />
                 <div className="pt-24 max-w-4xl mx-auto px-6">
                     <div className="space-y-4">
                         {[1, 2, 3].map(i => <div key={i} className="h-32 bg-white/5 animate-pulse rounded-2xl" />)}
@@ -117,7 +115,6 @@ export default function StoryEditorPage({ params }) {
 
     return (
         <main className="min-h-screen bg-[#050505]">
-            <Navbar />
             <div className="pt-24 pb-16 max-w-4xl mx-auto px-6">
                 <div className="flex items-center justify-between mb-8">
                     <div>

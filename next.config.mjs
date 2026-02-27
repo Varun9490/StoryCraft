@@ -22,7 +22,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://*.digitaloceanspaces.com",
+      "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://api.meshy.ai https://google.serper.dev wss: ws:",
       "frame-src https://api.razorpay.com",
@@ -33,10 +33,8 @@ const securityHeaders = [
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: '*.digitaloceanspaces.com' },
-      { protocol: 'https', hostname: '*.cdn.digitaloceanspaces.com' },
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: '**' },
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,

@@ -168,7 +168,7 @@ export default function AccountPage() {
                         <div className="relative group">
                             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 bg-[#1A1209] flex items-center justify-center flex-shrink-0">
                                 {avatar ? (
-                                    <Image src={avatar} alt={name} width={96} height={96} className="w-full h-full object-cover" />
+                                    <img src={avatar} alt={name} className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="text-3xl text-white/20">
                                         {name?.charAt(0)?.toUpperCase() || '?'}
@@ -267,6 +267,18 @@ export default function AccountPage() {
                                     onChange={e => setPhone(e.target.value)}
                                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#C4622D]/40 transition-colors"
                                     placeholder="+91 9876543210"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] text-white/40 uppercase tracking-wider mb-2 font-medium">
+                                    Profile Picture URL
+                                </label>
+                                <input
+                                    value={avatar}
+                                    onChange={e => setAvatar(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#C4622D]/40 transition-colors"
+                                    placeholder="https://"
                                 />
                             </div>
 
