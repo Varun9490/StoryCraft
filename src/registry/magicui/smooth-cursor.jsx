@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useSpring } from 'framer-motion';
 
 const DefaultCursorSVG = () => {
@@ -80,6 +80,11 @@ export function SmoothCursor({
     const previousAngle = useRef(0);
     const accumulatedRotation = useRef(0);
     const scaleTimeout = useRef(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        setIsMobile(window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 1024);
+    }, []);
 
     const cursorX = useSpring(0, springConfig);
     const cursorY = useSpring(0, springConfig);
@@ -95,6 +100,8 @@ export function SmoothCursor({
     });
 
     useEffect(() => {
+        if (isMobile) return;
+
         const updateVelocity = (currentPos) => {
             const currentTime = Date.now();
             const deltaTime = currentTime - lastUpdateTime.current;
@@ -161,7 +168,9 @@ export function SmoothCursor({
             if (rafId) cancelAnimationFrame(rafId);
             clearTimeout(scaleTimeout.current);
         };
-    }, [cursorX, cursorY, rotation, scale]);
+    }, [cursorX, cursorY, rotation, scale, isMobile]);
+
+    if (isMobile) return null;
 
     return (
         <motion.div

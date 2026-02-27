@@ -12,7 +12,7 @@ const publicNavItems = [
     { label: "AI Features", href: "/#ai-features" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ accountMode = false }) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isOnLight, setIsOnLight] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -67,21 +67,31 @@ export default function Navbar() {
                 }`}
         >
             <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                {/* Logo */}
-                <a href="#" className="flex items-center gap-1">
-                    <span
-                        className="text-2xl font-bold italic"
-                        style={{
-                            fontFamily: "var(--font-playfair)",
-                            color: "#C4622D",
-                        }}
+                {/* Logo or Back Arrow */}
+                {!accountMode ? (
+                    <a href="#" className="flex items-center gap-1">
+                        <span
+                            className="text-2xl font-bold italic"
+                            style={{
+                                fontFamily: "var(--font-playfair)",
+                                color: "#C4622D",
+                            }}
+                        >
+                            StoryCraft
+                        </span>
+                    </a>
+                ) : (
+                    <button
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
                     >
-                        StoryCraft
-                    </span>
-                </a>
+                        <span className="text-xl">←</span>
+                        <span className="font-semibold tracking-wide text-sm hidden sm:inline" style={{ fontFamily: "var(--font-inter)" }}>My Account</span>
+                    </button>
+                )}
 
                 {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-8">
+                <div className={`hidden md:flex items-center gap-8 ${accountMode ? 'opacity-0 pointer-events-none absolute' : ''}`}>
                     {navItems.map((item) => (
                         <a
                             key={item.label}
@@ -173,21 +183,18 @@ export default function Navbar() {
                 {/* Mobile Menu Button */}
                 <button
                     id="mobile-menu-toggle"
-                    className="md:hidden flex flex-col gap-1.5 p-2"
+                    className="md:hidden w-10 h-10 relative flex items-center justify-center focus:outline-none"
                     onClick={() => setMobileOpen(!mobileOpen)}
                     aria-label="Toggle menu"
                 >
                     <span
-                        className={`w-6 h-0.5 transition-all duration-300 ${isOnLight && isScrolled ? "bg-[#1A1209]" : "bg-white"
-                            } ${mobileOpen ? "rotate-45 translate-y-2" : ""}`}
+                        className={`absolute w-6 h-[2px] rounded-full transition-all duration-300 ${isOnLight && isScrolled && !mobileOpen ? "bg-[#1A1209]" : "bg-white"} ${mobileOpen ? "top-1/2 -translate-y-1/2 rotate-45" : "top-[12px]"}`}
                     />
                     <span
-                        className={`w-6 h-0.5 transition-all duration-300 ${isOnLight && isScrolled ? "bg-[#1A1209]" : "bg-white"
-                            } ${mobileOpen ? "opacity-0" : ""}`}
+                        className={`absolute top-1/2 -translate-y-1/2 w-6 h-[2px] rounded-full transition-all duration-300 ${isOnLight && isScrolled && !mobileOpen ? "bg-[#1A1209]" : "bg-white"} ${mobileOpen ? "opacity-0 scale-0" : "opacity-100"}`}
                     />
                     <span
-                        className={`w-6 h-0.5 transition-all duration-300 ${isOnLight && isScrolled ? "bg-[#1A1209]" : "bg-white"
-                            } ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`}
+                        className={`absolute w-6 h-[2px] rounded-full transition-all duration-300 ${isOnLight && isScrolled && !mobileOpen ? "bg-[#1A1209]" : "bg-white"} ${mobileOpen ? "top-1/2 -translate-y-1/2 -rotate-45" : "bottom-[12px]"}`}
                     />
                 </button>
             </div>
