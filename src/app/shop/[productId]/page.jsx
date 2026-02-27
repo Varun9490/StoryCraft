@@ -23,6 +23,7 @@ export default function ProductDetailPage({ params }) {
     const { dispatch } = useCart();
     const [faqs, setFaqs] = useState([]);
     const [activeTab, setActiveTab] = useState('photos');
+    const { user } = useAuth();
 
 
     useEffect(() => {

@@ -18,6 +18,10 @@
 }
 
 /* ===== BASE STYLES ===== */
+* {
+  cursor: none !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -29,6 +33,7 @@ body {
   color: var(--color-text-dark);
   font-family: var(--font-inter);
   overflow-x: hidden;
+  cursor: none !important;
 }
 
 /* ===== NOISE TEXTURE OVERLAY ===== */
