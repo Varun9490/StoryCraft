@@ -148,36 +148,7 @@ Generate a single product photograph showing the customized version.`;
             folder: 'storycraft/customizations',
         });
 
-        // Save as message in chat
-        const artisan = await Artisan.findOne({ user: decoded.userId });
-        chat.messages.push({
-            sender: decoded.userId,
-            content: 'AI Customization Preview Generated',
-            message_type: 'aipreview',
-            image_url: uploadResult.url,
-            read: false,
-            createdAt: new Date(),
-        });
-        chat.customization_status = 'preview_generated';
-        chat.last_message = 'AI Preview Generated';
-        chat.last_message_at = new Date();
-        await chat.save();
-
-        const savedMessage = chat.messages[chat.messages.length - 1];
-
-        // Emit to buyer via Socket.io
-        try {
-            const io = getIO();
-            io.to(chatId).emit('preview_ready', {
-                chatId,
-                imageUrl: uploadResult.url,
-                messageId: savedMessage._id,
-            });
-            io.to(chatId).emit('new_message', { message: savedMessage, chatId });
-        } catch (socketErr) {
-            console.warn('Socket emit failed (non-fatal):', socketErr.message);
-        }
-
+        // Return to artisan for approval before saving to chat and product
         return NextResponse.json({
             success: true,
             data: { imageUrl: uploadResult.url },

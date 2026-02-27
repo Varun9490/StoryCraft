@@ -56,14 +56,14 @@ function ChatPopout() {
 
     useEffect(() => {
         const handleOpenPopup = async (e) => {
-            const { artisanId, productId, type, initialMessage } = e.detail;
+            const { artisanId, productId, type, initialMessage, imageUrl } = e.detail;
             setIsOpen(true);
             setLoading(true);
             try {
                 const res = await fetch(`/api/chats`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ artisanId, productId, messageType: type, initialMessage })
+                    body: JSON.stringify({ artisanId, productId, messageType: type, initialMessage, referenceImageUrl: imageUrl })
                 });
                 const data = await res.json();
                 if (data.success && data.data.chat) {

@@ -20,6 +20,7 @@ export default function ChatDetailPage({ params }) {
     const [customizationPrompt, setCustomizationPrompt] = useState('');
     const [generationLoading, setGenerationLoading] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState(null);
+    const [unapprovedPreviewUrl, setUnapprovedPreviewUrl] = useState(null);
 
     useEffect(() => {
         if (!authLoading && !user) router.push('/login');
@@ -111,13 +112,31 @@ export default function ChatDetailPage({ params }) {
             });
             const data = await res.json();
             if (data.success) {
-                setChat((prev) => prev ? { ...prev, customization_status: 'preview_generated' } : prev);
-                setPreviewImageUrl(data.data.imageUrl);
+                setUnapprovedPreviewUrl(data.data.imageUrl);
             }
         } catch (err) {
             console.error('Preview generation failed:', err);
         } finally {
             setGenerationLoading(false);
+        }
+    };
+
+    const handleApprovePreview = async () => {
+        if (!unapprovedPreviewUrl) return;
+        try {
+            const res = await fetch(`/api/ai/approve-customization-preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatId, imageUrl: unapprovedPreviewUrl }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setChat((prev) => prev ? { ...prev, customization_status: 'preview_generated' } : prev);
+                setPreviewImageUrl(unapprovedPreviewUrl);
+                setUnapprovedPreviewUrl(null);
+            }
+        } catch (err) {
+            console.error('Failed to approve:', err);
         }
     };
 
@@ -192,6 +211,31 @@ export default function ChatDetailPage({ params }) {
                     >
                         {generationLoading ? '✦ Generating Preview...' : '✦ Generate AI Preview'}
                     </button>
+                    {unapprovedPreviewUrl && (
+                        <div className="mt-4 p-4 rounded-xl border border-[#8B5CF6]/30 bg-[#8B5CF6]/10 flex flex-col gap-3 sm:flex-row items-center">
+                            <div className="w-24 h-24 rounded-lg overflow-hidden bg-black/20 shrink-0">
+                                <img src={unapprovedPreviewUrl} alt="Unapproved Preview" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm text-white/90 font-medium mb-1">Preview Generated Successfully</p>
+                                <p className="text-xs text-white/60 mb-3">Review the image before sending it to the buyer. If approved, it will be added to your product photos automatically.</p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleApprovePreview}
+                                        className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#8B5CF6] text-white hover:brightness-110"
+                                    >
+                                        Approve & Send to Buyer
+                                    </button>
+                                    <button
+                                        onClick={() => setUnapprovedPreviewUrl(null)}
+                                        className="px-4 py-2 rounded-lg text-xs font-semibold border border-white/20 text-white/70 hover:bg-white/10"
+                                    >
+                                        Discard
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

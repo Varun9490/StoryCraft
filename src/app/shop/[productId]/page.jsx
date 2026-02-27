@@ -17,6 +17,7 @@ import { useViewTracker } from '@/hooks/useViewTracker';
 import WishlistButton from '@/components/ui/WishlistButton';
 import Head from 'next/head';
 import ProductFeedback from '@/components/shop/ProductFeedback';
+import CustomizationModal from '@/components/shop/CustomizationModal';
 
 const ProductModelViewer = dynamic(() => import('@/components/three/ProductModelViewer'), { ssr: false });
 
@@ -77,6 +78,7 @@ export default function ProductDetailPage({ params }) {
     const [faqs, setFaqs] = useState([]);
     const { user } = useAuth();
     const { lang, toggleLang, t, loading: translating } = useTranslation(productId);
+    const [showCustomModal, setShowCustomModal] = useState(false);
 
     useViewTracker(productId);
 
@@ -343,9 +345,7 @@ export default function ProductDetailPage({ params }) {
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            window.dispatchEvent(new CustomEvent('openChatPopup', {
-                                                detail: { artisanId, productId: product._id, type: 'customization_request', initialMessage: 'I would like to request a customization.' }
-                                            }));
+                                            setShowCustomModal(true);
                                         }}
                                         className="inline-block text-xs px-4 py-2 rounded-lg bg-[#C4622D] text-white font-semibold hover:brightness-110 transition-all text-left w-fit"
                                     >
@@ -395,6 +395,35 @@ export default function ProductDetailPage({ params }) {
                                     <p className="text-white/50">3D model not available yet.</p>
                                 )}
                             </div>
+                        )}
+
+                        {showCustomModal && (
+                            <CustomizationModal
+                                isOpen={showCustomModal}
+                                onClose={() => setShowCustomModal(false)}
+                                onSubmit={(data) => {
+                                    setShowCustomModal(false);
+                                    let initialMessage = '';
+                                    let imageUrl = '';
+
+                                    if (data.type === 'color') {
+                                        initialMessage = `Color Change Request: ${data.text}`;
+                                    } else if (data.type === 'photo') {
+                                        initialMessage = 'Customization Request via Photo Reference';
+                                        imageUrl = data.url;
+                                    }
+
+                                    window.dispatchEvent(new CustomEvent('openChatPopup', {
+                                        detail: {
+                                            artisanId,
+                                            productId: product._id,
+                                            type: 'customization_request',
+                                            initialMessage,
+                                            imageUrl
+                                        }
+                                    }));
+                                }}
+                            />
                         )}
                     </motion.div>
                 </div>
