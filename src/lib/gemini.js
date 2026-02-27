@@ -63,10 +63,6 @@ export async function generateWithRetry(model, prompt, maxRetries = 1) {
     }
 }
 
-/**
- * Strips markdown code blocks and extracts pure JSON from AI output.
- * Handles ```json ... ```, ``` ... ```, or raw JSON.
- */
 export function parseAIJson(rawText) {
     let cleaned = rawText.trim();
     // Strip markdown fenced code blocks
@@ -74,5 +70,36 @@ export function parseAIJson(rawText) {
     if (fenceMatch) {
         cleaned = fenceMatch[1].trim();
     }
-    return JSON.parse(cleaned);
+
+    try {
+        return JSON.parse(cleaned);
+    } catch (e) {
+        // If parsing fails, try to extract just the first {...} or [...] block
+        const startBracket = cleaned.indexOf('[');
+        const startBrace = cleaned.indexOf('{');
+
+        let startIdx = -1;
+        let endChar = '';
+        if (startBracket !== -1 && (startBrace === -1 || startBracket < startBrace)) {
+            startIdx = startBracket;
+            endChar = ']';
+        } else if (startBrace !== -1) {
+            startIdx = startBrace;
+            endChar = '}';
+        }
+
+        if (startIdx !== -1) {
+            const endIdx = cleaned.lastIndexOf(endChar);
+            if (endIdx > startIdx) {
+                const subStr = cleaned.substring(startIdx, endIdx + 1);
+                try {
+                    return JSON.parse(subStr);
+                } catch (e2) {
+                    throw e; // throw original
+                }
+            }
+        }
+
+        throw e;
+    }
 }
