@@ -14,8 +14,7 @@ export async function POST(request, { params }) {
             return NextResponse.json({ success: false, error: 'Too many requests. Please slow down.' }, { status: 429 });
         }
 
-        const rawBody = await request.json();
-        const body = sanitizeBody(rawBody);
+        // Route expects no body
 
         // Rate limit
         const aiLimit = aiLimiter(request);

@@ -505,31 +505,6 @@ export default function ProductUploadForm({ existingProduct = null }) {
                             />
                         </div>
 
-                        {/* 3D Generation Hint */}
-                        <div className="border-t border-white/10 pt-5">
-                            <div className="flex items-center gap-3">
-                                <span className="text-xl">🧊</span>
-                                <div className="flex-1">
-                                    <h4 className="text-sm text-white/90 font-medium">Immersive 3D Generation</h4>
-                                    <p className="text-xs text-white/50">
-                                        Use Stability SF3D API to automatically convert your images into an interactive 3D model.
-                                    </p>
-                                </div>
-                                {isEdit && existingProduct?._id ? (
-                                    <button
-                                        onClick={handleGenerate3D}
-                                        disabled={isGenerating3D}
-                                        className="text-xs px-4 py-2 bg-[#8B5CF6] text-white rounded-lg hover:brightness-110 shadow-[0_0_15px_rgba(139,92,246,0.2)] transition-all font-medium disabled:opacity-50"
-                                    >
-                                        {isGenerating3D ? 'Generating...' : 'Generate 3D Model ✨'}
-                                    </button>
-                                ) : (
-                                    <div className="text-[10px] px-3 py-1.5 rounded bg-white/5 border border-white/10 text-white/40 font-medium">
-                                        Save product first to unlock
-                                    </div>
-                                )}
-                            </div>
-                        </div>
 
                         <div className="flex gap-3 pt-4">
                             <button onClick={() => setStep(1)} className="flex-1 py-3 rounded-xl font-semibold border border-white/10 text-white/60 hover:bg-white/5 transition-colors">
