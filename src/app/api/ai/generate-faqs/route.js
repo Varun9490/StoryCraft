@@ -66,7 +66,7 @@ export async function POST(request) {
             );
         }
 
-        const model = getFlashModel();
+        const model = getFlashModel({ requireJson: true });
 
         const prompt = `You are an expert in Indian traditional crafts and handmade products for an e-commerce platform. A buyer is browsing an artisan product listing. Generate exactly 8 natural buyer questions with helpful, accurate answers.
 
@@ -89,7 +89,6 @@ Format:
 
 Generate exactly 8 items.`;
 
-        const model = getFlashModel({ requireJson: true });
         let parsedFaqs;
 
         try {
