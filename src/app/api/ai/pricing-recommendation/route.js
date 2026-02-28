@@ -114,17 +114,17 @@ Provide a pricing recommendation. Return ONLY valid JSON in this exact shape:
 
 Rules: All percentage fields must sum to 100. suggested_price must be within or near market_range. Return ONLY the JSON object — no markdown, no text. Ensure any double quotes inside string values are properly escaped (e.g. \\").`;
 
-        const model = getFlashModel();
+        const model = getFlashModel({ requireJson: true });
         let parsedResult;
 
         try {
-            const rawText = await generateWithRetry(model, pricingPrompt);
+            const rawText = await generateWithRetry(model, pricingPrompt, 3, true);
             parsedResult = parseAIJson(rawText);
         } catch (firstErr) {
             console.error('Pricing AI First Parse Error:', firstErr.message);
             try {
                 const strictPrompt = pricingPrompt + '\n\nCRITICAL: Return ONLY raw JSON. Do not use Markdown backticks. Escape double quotes inside values properly.';
-                const rawText = await generateWithRetry(model, strictPrompt);
+                const rawText = await generateWithRetry(model, strictPrompt, 3, true);
                 parsedResult = parseAIJson(rawText);
             } catch (secondErr) {
                 console.error('Pricing AI Second Parse Error:', secondErr.message);

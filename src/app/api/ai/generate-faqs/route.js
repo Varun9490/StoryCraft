@@ -89,10 +89,11 @@ Format:
 
 Generate exactly 8 items.`;
 
+        const model = getFlashModel({ requireJson: true });
         let parsedFaqs;
 
         try {
-            const rawText = await generateWithRetry(model, prompt);
+            const rawText = await generateWithRetry(model, prompt, 3, true);
             let resultFaqs = parseAIJson(rawText);
             if (resultFaqs && !Array.isArray(resultFaqs) && Array.isArray(resultFaqs.faqs)) {
                 resultFaqs = resultFaqs.faqs;
@@ -102,7 +103,7 @@ Generate exactly 8 items.`;
             // Retry with stricter prompt
             try {
                 const strictPrompt = prompt + '\n\nCRITICAL: Return ONLY raw JSON. No markdown formatting. No ```json blocks. Just the array.';
-                const rawText = await generateWithRetry(model, strictPrompt);
+                const rawText = await generateWithRetry(model, strictPrompt, 3, true);
                 let resultFaqs = parseAIJson(rawText);
                 if (resultFaqs && !Array.isArray(resultFaqs) && Array.isArray(resultFaqs.faqs)) {
                     resultFaqs = resultFaqs.faqs;

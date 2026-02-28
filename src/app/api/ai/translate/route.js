@@ -65,7 +65,7 @@ export async function POST(request) {
 ${numberedTexts}`;
 
             const model = getFlashModel();
-            const rawText = await generateWithRetry(model, prompt);
+            const rawText = await generateWithRetry(model, prompt, 3);
 
             const regex = /\[(\d+)\]\s*([\s\S]*?)(?=\[\d+\]|$)/g;
             const matches = [...rawText.matchAll(regex)];

@@ -38,7 +38,7 @@ export function getGenAI() {
     return new GoogleGenerativeAI(key);
 }
 
-export function getFlashModel() {
+export function getFlashModel({ requireJson = false } = {}) {
     return getGenAI().getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: {
@@ -46,18 +46,26 @@ export function getFlashModel() {
             topK: 32,
             topP: 0.95,
             maxOutputTokens: 2048,
+            ...(requireJson && { responseMimeType: 'application/json' }),
         },
     });
 }
 
-export async function generateWithRetry(model, prompt, maxRetries = 1) {
+export async function generateWithRetry(model, prompt, maxRetries = 1, requireJson = false) {
+    let currentModel = model;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-            const result = await model.generateContent(prompt);
-            const text = result.response.text();
-            return text;
+            const result = await currentModel.generateContent(prompt);
+            return result.response.text();
         } catch (error) {
             if (attempt === maxRetries) throw error;
+            console.warn(`[Gemini] Attempt ${attempt + 1} failed. Rotating API key and retrying... Error:`, error.message);
+            try {
+                // Instantiating a new model will invoke getApiKey() which securely checks out the next key
+                currentModel = getFlashModel({ requireJson });
+            } catch (e) {
+                // If this fails (e.g. no keys left), it will fallback to old
+            }
             await new Promise((r) => setTimeout(r, 1000));
         }
     }

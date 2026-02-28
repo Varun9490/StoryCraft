@@ -47,16 +47,16 @@ Respond ONLY with valid, minified JSON matching this array structure exactly, wi
 
 CRITICAL: Do not write anything outside the actual JSON array. Ensure all double quotes inside strings are properly escaped like \\". Do not use markdown \`\`\`json blocks.`;
 
-    const model = getFlashModel();
+    const model = getFlashModel({ requireJson: true });
     let insights = [];
 
     try {
-      const rawText = await generateWithRetry(model, prompt);
+      const rawText = await generateWithRetry(model, prompt, 3, true);
       insights = parseAIJson(rawText);
     } catch (e) {
       try {
         const strictPrompt = prompt + '\n\nCRITICAL: Return ONLY raw JSON array. DO NOT use markdown. Escape all strings properly.';
-        const rawText = await generateWithRetry(model, strictPrompt);
+        const rawText = await generateWithRetry(model, strictPrompt, 3, true);
         insights = parseAIJson(rawText);
       } catch (e2) {
         console.error('Insights JSON Parsing Error:', e2);
