@@ -5,13 +5,25 @@ import { useRouter } from 'next/navigation';
 
 let globalRefreshPromise = null;
 let globalMePromise = null;
+let globalUser = null;
+const authListeners = new Set();
+
+function setGlobalUser(u) {
+    globalUser = u;
+    authListeners.forEach(listener => listener(u));
+}
 
 export function useAuth() {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUserState] = useState(globalUser);
+    const [loading, setLoading] = useState(!globalUser);
     const [error, setError] = useState(null);
     const router = useRouter();
     const refreshTimer = useRef(null);
+
+    useEffect(() => {
+        authListeners.add(setUserState);
+        return () => authListeners.delete(setUserState);
+    }, []);
 
     const refreshSession = useCallback(async () => {
         if (!globalRefreshPromise) {
@@ -23,7 +35,7 @@ export function useAuth() {
 
         const data = await globalRefreshPromise;
         if (data?.success) {
-            setUser(data.data.user);
+            setGlobalUser(data.data.user);
             return true;
         }
         return false;
@@ -34,13 +46,17 @@ export function useAuth() {
             const res = await fetch('/api/auth/me');
             const data = await res.json();
             if (data.success) {
-                setUser(data.data.user);
+                setGlobalUser(data.data.user);
             }
         } catch { }
     }, []);
 
     useEffect(() => {
         async function fetchUser() {
+            if (globalUser) {
+                setLoading(false);
+                return;
+            }
             try {
                 if (!globalMePromise) {
                     globalMePromise = fetch('/api/auth/me')
@@ -50,7 +66,7 @@ export function useAuth() {
                 const data = await globalMePromise;
 
                 if (data?.success) {
-                    setUser(data.data.user);
+                    setGlobalUser(data.data.user);
                 } else {
                     const refreshed = await refreshSession();
                     if (!refreshed) setError(data?.error);
@@ -91,7 +107,7 @@ export function useAuth() {
     async function logout() {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
-            setUser(null);
+            setGlobalUser(null);
             clearInterval(refreshTimer.current);
             router.push('/login');
         } catch (err) {
