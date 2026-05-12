@@ -17,27 +17,7 @@ Every product is a story — the artisan who made it, the technique behind it, a
 
 </div>
 
----
 
-## 🎥 Live Demo
-
-<p align="center">
-  <a href="https://www.loom.com/share/e7b6087558374d818d2b6dc3e37b47fe">
-    <img 
-      src="https://cdn.loom.com/sessions/thumbnails/e7b6087558374d818d2b6dc3e37b47fe-with-play.gif" 
-      alt="StoryCraft Demo"
-      width="100%"
-    />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://www.loom.com/share/e7b6087558374d818d2b6dc3e37b47fe">
-    Watch Full Demo →
-  </a>
-</p>
-
----
 
 ## 🧭 The Problem
 
