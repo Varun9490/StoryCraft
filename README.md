@@ -9,19 +9,35 @@
 Connecting buyers directly to verified craftspeople from Visakhapatnam and across India.  
 Every product is a story — the artisan who made it, the technique behind it, and the cultural legacy it carries.
 
-[
+<br/>
 
-
-
-
-
-
-
-
+<a href="https://www.loom.com/share/e7b6087558374d818d2b6dc3e37b47fe">
+  <img src="https://img.shields.io/badge/Watch-Demo-orange?style=for-the-badge&logo=loom&logoColor=white" alt="Demo Video"/>
+</a>
 
 </div>
 
-***
+---
+
+## 🎥 Live Demo
+
+<p align="center">
+  <a href="https://www.loom.com/share/e7b6087558374d818d2b6dc3e37b47fe">
+    <img 
+      src="https://cdn.loom.com/sessions/thumbnails/e7b6087558374d818d2b6dc3e37b47fe-with-play.gif" 
+      alt="StoryCraft Demo"
+      width="100%"
+    />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.loom.com/share/e7b6087558374d818d2b6dc3e37b47fe">
+    Watch Full Demo →
+  </a>
+</p>
+
+---
 
 ## 🧭 The Problem
 
@@ -29,7 +45,7 @@ Over **7 million artisan households** in India produce heritage-grade goods but 
 
 **StoryCraft fixes this.** Direct artisan-to-buyer commerce with AI-powered tools, real-time communication, cinematic storytelling, and a comprehensive seller dashboard — all designed to preserve cultural heritage while generating sustainable income for craftspeople.
 
-***
+---
 
 ## ✨ Features
 
@@ -51,7 +67,7 @@ Scroll-driven documentary-style narrative using **GSAP ScrollTrigger** and **Len
 
 The transition from emotional storytelling to functional e-commerce is seamless — users scroll from a documentary directly into a shop.
 
-***
+---
 
 ### 🤖 AI Capabilities (7 Functions via Gemini 2.5 Flash)
 
@@ -67,7 +83,7 @@ The transition from emotional storytelling to functional e-commerce is seamless 
 
 All AI endpoints share a common utility layer with **retry logic**, **exponential backoff**, **structured JSON parsing with fallback prompts**, and **safety content filtering**.
 
-***
+---
 
 ### 🛒 Commerce & Product Features
 
@@ -80,7 +96,7 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 - **Shop filtering** — category, material, price range, city; sort by price, date, popularity
 - **Multi-city support** — Visakhapatnam, Hyderabad, Chennai, Kolkata
 
-***
+---
 
 ### 💬 Real-Time Chat & Customization
 
@@ -91,7 +107,7 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 - Conversation list with unread counts and timestamps
 - **AI Customization Preview** — artisan sends product image + prompt → Gemini generates preview → uploaded to Cloudinary → delivered to buyer's chat in real-time
 
-***
+---
 
 ### 🔐 Multi-Role Authentication
 
@@ -101,7 +117,7 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 - Password hashing with **bcrypt (12-round salt)**
 - Role-based route protection
 
-***
+---
 
 ### 📊 Artisan Analytics Dashboard
 
@@ -112,23 +128,25 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 - **Top products** ranked by view count
 - All data computed server-side via **MongoDB aggregation pipelines on indexed fields**
 
-***
+---
 
 ### 🌐 PWA & SEO
 
-**PWA Support**
+#### PWA Support
+
 - Service worker via `@ducanh2912/next-pwa` with offline caching
 - Installable on mobile and desktop (home screen prompt)
 - Custom cursor auto-hidden on touch devices
 
-**SEO**
+#### SEO
+
 - Dynamic meta tags per page (title, description, keywords, OpenGraph)
 - Product **JSON-LD structured data** for rich search results
 - **FAQ schema markup** for FAQ-rich snippets in Google
 - Dynamic `sitemap.js` crawling published products and artisan profiles
 - Image optimization with automatic **AVIF and WebP** selection
 
-***
+---
 
 ## 🛠️ Tech Stack
 
@@ -147,7 +165,7 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 | SEO | JSON-LD, dynamic sitemap, OpenGraph |
 | PWA | @ducanh2912/next-pwa |
 
-***
+---
 
 ## 🏗️ Architecture & Security
 
@@ -158,7 +176,7 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 - **Input sanitization** via DOMPurify and mongo-sanitize
 - **IP-based and product-level rate limiting** on all AI endpoints (max 5 AI generations per product)
 
-***
+---
 
 ## 🚀 Getting Started
 
@@ -173,7 +191,7 @@ All AI endpoints share a common utility layer with **retry logic**, **exponentia
 ```bash
 git clone https://github.com/Varun9490/StoryCraft.git
 cd StoryCraft
-```
+````
 
 ### 2. Install dependencies
 
@@ -187,37 +205,11 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your credentials:
-
-```env
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/storycraft
-JWT_SECRET=your-jwt-secret
-
-CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
-
-GEMINI_API_KEY=your-gemini-api-key
-
-RAZORPAY_KEY_ID=rzp_live_xxxxx
-RAZORPAY_KEY_SECRET=your-razorpay-secret
-
-# Optional — DigitalOcean Spaces for 3D model storage
-DO_SPACES_KEY=your-spaces-key
-DO_SPACES_SECRET=your-spaces-secret
-DO_SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
-DO_SPACES_BUCKET=your-bucket-name
-
-# Optional — competitor price scraping
-SERPER_API_KEY=your-serper-api-key
-```
-
 ### 4. Run development server
 
 ```bash
 npm run dev
 ```
-
-> Starts a custom Node.js server (`server.js`) that integrates Socket.IO with Next.js.  
-> App available at **http://localhost:3000**
 
 ### 5. Build for production
 
@@ -226,104 +218,13 @@ npm run build
 npm run start
 ```
 
-***
-
-## 📁 Project Structure
-
-```
-storycraft/
-├── app/
-│   ├── api/
-│   │   ├── auth/           # JWT, refresh token, login, register
-│   │   ├── products/       # CRUD, AI analysis, FAQ, pricing
-│   │   ├── chat/           # Socket.IO message persistence
-│   │   ├── orders/         # Razorpay + order lifecycle
-│   │   └── analytics/      # MongoDB aggregation pipelines
-│   ├── (marketing)/        # Landing page, storytelling sections
-│   ├── shop/               # Product browsing + filtering
-│   ├── dashboard/          # Artisan analytics + product manager
-│   └── profile/            # Buyer and artisan profiles
-├── components/
-│   ├── landing/            # GSAP + Three.js storytelling sections
-│   ├── chat/               # Socket.IO pop-out chat UI
-│   ├── ai/                 # Kala chatbot, Kavya support bot
-│   └── ui/                 # Shared glassmorphism components
-├── lib/
-│   ├── auth.js             # JWT helpers + middleware
-│   ├── aiDetection.js      # Gemini utility layer
-│   ├── rateLimit.js        # IP + product-level rate limiting
-│   └── sanitize.js         # DOMPurify + mongo-sanitize
-├── server.js               # Custom Node.js server with Socket.IO
-├── public/
-└── next.config.js
-```
-
-***
-
-## 🎬 Demo Flow
-
-1. **Landing page** — Scroll through all sections. Note cinematic transitions, WebGL globe, and story panels.
-2. **Shop** — Browse and filter products. Open a product to see the full-viewport image carousel, FAQs, and 3D model viewer.
-3. **Kala chatbot** — Click the purple button (bottom-left). Ask about craft techniques or products.
-4. **Messages** — Click the orange button (bottom-right). View conversations and send a message.
-5. **Artisan dashboard** — Log in as an artisan. View analytics, product list, and orders.
-6. **AI product listing** — Add a product, upload an image, trigger AI Image Analysis. Watch fields auto-fill.
-7. **AI pricing** — Trigger AI Pricing Recommendation on a product. View the margin breakdown.
-8. **FAQ manager** — Generate FAQs with AI. Approve or reject individual questions.
-9. **Customization flow** — Request a customization as a buyer; watch the AI preview arrive in chat.
-10. **PWA** — Resize to mobile, check responsive layouts. Show install prompt if triggered.
-
-***
-
-## 🏆 Judging Alignment
-
-| Criteria | Highlights |
-|----------|------------|
-| **Architecture & Security** (20 pts) | Custom Node.js + Next.js hybrid server, compound MongoDB indexes, HttpOnly JWT rotation, CSP headers, IP rate limiting |
-| **Innovation** (20 pts) | 7-function AI suite on a single Gemini model, vision-to-catalog pipeline, real-time AI customization previews via Socket.IO |
-| **UI/UX** (10 pts) | Scroll-driven cinematic narrative, WebGL globe, 3D product viewer, custom cursor, glassmorphism dark theme |
-| **Documentation** (10 pts) | Comprehensive DOCUMENTATION.md, annotated README, commented code at decision points |
-
-***
-
-## 🗺️ Future Roadmap
-
-- [ ] AI watermark detection for authenticity certificates
-- [ ] Multi-language support (Telugu, Hindi, Tamil)
-- [ ] Enterprise/bulk buyer dashboards
-- [ ] LMS integrations for artisan skill development
-- [ ] VSCode extension for catalog management
-- [ ] PDF/DOCX invoice and catalog export
-- [ ] Semantic vector search across product descriptions
-
-***
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch — `git checkout -b feature/your-feature`
-3. Commit your changes — `git commit -m "Add your feature"`
-4. Push to the branch — `git push origin feature/your-feature`
-5. Open a Pull Request
-
-***
-
-## 🙏 Acknowledgments
-
-- [Google Gemini API](https://ai.google.dev/) — Multi-modal AI backbone
-- [Meshy API](https://www.meshy.ai/) — 3D model generation
-- [Razorpay](https://razorpay.com/) — Payment infrastructure
-- [Three.js](https://threejs.org/) & [GSAP](https://greensock.com/gsap/) — Visual storytelling
-- [Prisma](https://www.prisma.io/) & [Next.js Team](https://nextjs.org/)
-- The artisan communities of Visakhapatnam 🪔
-
-***
+---
 
 ## 📝 License
 
 Licensed under the [MIT License](./LICENSE).
 
-***
+---
 
 <div align="center">
 
@@ -332,3 +233,4 @@ Built with ❤️ for India's artisan communities — and the AI era.
 ⭐ **Star this repo** if StoryCraft resonates with you.
 
 </div>
+
